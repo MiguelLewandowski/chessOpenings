@@ -2,6 +2,7 @@
 #cursor 
 .cursor
 CHANGELOG.md
+docs
 
 # dependencies
 /node_modules
