@@ -51,3 +51,15 @@ body {
 .font-interface {
   font-family: var(--font-interface);
 }
+
+/* Classes utilitárias personalizadas */
+.border-3 {
+  border-width: 3px;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
