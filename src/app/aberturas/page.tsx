@@ -17,6 +17,7 @@ import { useAberturas } from '@/hooks/useAberturas';
 import { useLicoes } from '@/hooks/useLicoes';
 import ChessPreview from '@/components/ChessPreview';
 import Navbar from '@/components/Navbar';
+import Link from 'next/link';
 
 export default function GaleriaAberturas() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -272,10 +273,13 @@ export default function GaleriaAberturas() {
 
                 {/* Ações */}
                 <div className="flex gap-3">
-                  <button className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-3 rounded-lg font-interface font-semibold hover:bg-blue-700 transition-colors">
+                  <Link
+                    href={`/aberturas/${abertura.id}/trilha`}
+                    className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-3 rounded-lg font-interface font-semibold hover:bg-blue-700 transition-colors"
+                  >
                     <Play size={16} />
                     Estudar
-                  </button>
+                  </Link>
                   <button className="flex items-center justify-center gap-2 border border-gray-300 text-gray-700 px-4 py-3 rounded-lg font-interface font-semibold hover:bg-gray-50 transition-colors">
                     <Eye size={16} />
                     Preview
