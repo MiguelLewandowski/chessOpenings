@@ -118,20 +118,27 @@
 
 ---
 
-## 📦 Estrutura esperada de arquivos (sugestão)
+## 📦 Estrutura de Arquivos Implementada
 
-/app
-/components
-/features
-/hooks
-/pages
-/styles
-/utils
-/data (jsons)
+```
+/src
+  /app
+    /admin                    # Área administrativa
+      layout.tsx             # Layout da área admin
+      page.tsx              # Dashboard principal
+    layout.tsx              # Layout principal
+    page.tsx               # Página inicial
+    globals.css            # Estilos globais
+  /components
+    ChessDemo.tsx           # Demonstração interativa de xadrez
+```
 
-yaml
-Copiar
-Editar
+---
+
+## 📝 Documentação
+
+Para acompanhar o histórico de mudanças e desenvolvimento do projeto, consulte:
+- [**CHANGELOG.md**](./CHANGELOG.md) - Histórico detalhado de versões e modificações
 
 ---
 
