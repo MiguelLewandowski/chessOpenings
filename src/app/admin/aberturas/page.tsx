@@ -10,94 +10,39 @@ import {
   BookOpen,
   Target,
   Zap,
-  MoreVertical
+  MoreVertical,
+  Loader2,
+  X,
+  PlayCircle
 } from 'lucide-react';
-
-// Tipo para aberturas
-interface Abertura {
-  id: string;
-  nome: string;
-  categoria: 'Tática' | 'Posicional' | 'Universal';
-  dificuldade: 'Iniciante' | 'Intermediário' | 'Avançado';
-  movimentos: string[];
-  descricao: string;
-  licoes: number;
-  exercicios: number;
-  status: 'Ativo' | 'Rascunho' | 'Arquivado';
-  criadoEm: string;
-  atualizadoEm: string;
-}
+import AberturaForm from '@/components/admin/AberturaForm';
+import AberturaLicoesModal from '@/components/admin/AberturaLicoesModal';
+import { useAberturas, type Abertura, type AberturaFormData } from '@/hooks/useAberturas';
 
 export default function GerenciamentoAberturas() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategoria, setFilterCategoria] = useState<string>('all');
   const [filterDificuldade, setFilterDificuldade] = useState<string>('all');
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingAbertura, setEditingAbertura] = useState<Abertura | null>(null);
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+  const [isLicoesModalOpen, setIsLicoesModalOpen] = useState(false);
+  const [selectedAbertura, setSelectedAbertura] = useState<Abertura | null>(null);
+  
+  const {
+    loading,
+    error,
+    createAbertura,
+    updateAbertura,
+    deleteAbertura,
+    filterAberturas,
+    getStats,
+    clearError
+  } = useAberturas();
 
-  // Dados mockados - em produção viriam de uma API
-  const aberturas: Abertura[] = [
-    {
-      id: '1',
-      nome: 'Abertura Italiana',
-      categoria: 'Tática',
-      dificuldade: 'Iniciante',
-      movimentos: ['e4', 'e5', 'Nf3', 'Nc6', 'Bc4'],
-      descricao: 'Uma das aberturas mais antigas e clássicas do xadrez',
-      licoes: 8,
-      exercicios: 15,
-      status: 'Ativo',
-      criadoEm: '2024-01-15',
-      atualizadoEm: '2024-12-01'
-    },
-    {
-      id: '2',
-      nome: 'Defesa Siciliana',
-      categoria: 'Tática',
-      dificuldade: 'Intermediário',
-      movimentos: ['e4', 'c5'],
-      descricao: 'A defesa mais popular contra 1.e4',
-      licoes: 12,
-      exercicios: 25,
-      status: 'Ativo',
-      criadoEm: '2024-02-10',
-      atualizadoEm: '2024-12-10'
-    },
-    {
-      id: '3',
-      nome: 'Gambito da Dama',
-      categoria: 'Posicional',
-      dificuldade: 'Intermediário',
-      movimentos: ['d4', 'd5', 'c4'],
-      descricao: 'Abertura posicional que visa controle central',
-      licoes: 10,
-      exercicios: 20,
-      status: 'Rascunho',
-      criadoEm: '2024-03-05',
-      atualizadoEm: '2024-12-15'
-    },
-    {
-      id: '4',
-      nome: 'Abertura Inglesa',
-      categoria: 'Universal',
-      dificuldade: 'Avançado',
-      movimentos: ['c4'],
-      descricao: 'Abertura flexível com muitas transposições',
-      licoes: 15,
-      exercicios: 30,
-      status: 'Ativo',
-      criadoEm: '2024-04-20',
-      atualizadoEm: '2024-12-18'
-    }
-  ];
-
-  // Filtrar aberturas
-  const aberturasFiltradas = aberturas.filter(abertura => {
-    const matchSearch = abertura.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                       abertura.descricao.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchCategoria = filterCategoria === 'all' || abertura.categoria === filterCategoria;
-    const matchDificuldade = filterDificuldade === 'all' || abertura.dificuldade === filterDificuldade;
-    
-    return matchSearch && matchCategoria && matchDificuldade;
-  });
+  // Dados filtrados usando o hook
+  const aberturasFiltradas = filterAberturas(searchTerm, filterCategoria, filterDificuldade);
+  const stats = getStats();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -117,8 +62,68 @@ export default function GerenciamentoAberturas() {
     }
   };
 
+  const handleCreateAbertura = () => {
+    setFormMode('create');
+    setEditingAbertura(null);
+    setIsFormOpen(true);
+  };
+
+  const handleEditAbertura = (abertura: Abertura) => {
+    setFormMode('edit');
+    setEditingAbertura(abertura);
+    setIsFormOpen(true);
+  };
+
+  const handleSaveAbertura = async (data: AberturaFormData) => {
+    try {
+      if (formMode === 'create') {
+        await createAbertura(data);
+      } else if (editingAbertura) {
+        await updateAbertura(editingAbertura.id, data);
+      }
+      setIsFormOpen(false);
+    } catch (err) {
+      console.error('Erro ao salvar abertura:', err);
+    }
+  };
+
+  const handleDeleteAbertura = async (id: string) => {
+    if (window.confirm('Tem certeza que deseja excluir esta abertura?')) {
+      try {
+        await deleteAbertura(id);
+      } catch (err) {
+        console.error('Erro ao deletar abertura:', err);
+      }
+    }
+  };
+
+  const handleViewLicoes = (abertura: Abertura) => {
+    setSelectedAbertura(abertura);
+    setIsLicoesModalOpen(true);
+  };
+
+  const handleCloseLicoesModal = () => {
+    setIsLicoesModalOpen(false);
+    setSelectedAbertura(null);
+  };
+
   return (
     <div className="space-y-6">
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <p className="text-red-700 font-body">{error}</p>
+            <button
+              onClick={clearError}
+              className="text-red-400 hover:text-red-600"
+            >
+              <X size={20} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
         <div>
@@ -129,8 +134,12 @@ export default function GerenciamentoAberturas() {
             Crie, edite e organize as aberturas de xadrez da plataforma
           </p>
         </div>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-interface font-semibold hover:bg-blue-700 transition-colors">
-          <Plus size={18} />
+        <button 
+          onClick={handleCreateAbertura}
+          disabled={loading}
+          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-interface font-semibold hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+        >
+          {loading ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
           Nova Abertura
         </button>
       </div>
@@ -188,7 +197,7 @@ export default function GerenciamentoAberturas() {
                 <th className="text-left p-4 font-interface font-semibold text-gray-700">Abertura</th>
                 <th className="text-left p-4 font-interface font-semibold text-gray-700">Categoria</th>
                 <th className="text-left p-4 font-interface font-semibold text-gray-700">Dificuldade</th>
-                <th className="text-left p-4 font-interface font-semibold text-gray-700">Conteúdo</th>
+                <th className="text-left p-4 font-interface font-semibold text-gray-700">Descrição</th>
                 <th className="text-left p-4 font-interface font-semibold text-gray-700">Status</th>
                 <th className="text-left p-4 font-interface font-semibold text-gray-700">Atualizado</th>
                 <th className="text-right p-4 font-interface font-semibold text-gray-700">Ações</th>
@@ -215,10 +224,9 @@ export default function GerenciamentoAberturas() {
                     <span className="font-body text-sm text-gray-700">{abertura.dificuldade}</span>
                   </td>
                   <td className="p-4">
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
-                      <span>{abertura.licoes} lições</span>
-                      <span>{abertura.exercicios} exercícios</span>
-                    </div>
+                    <p className="font-body text-sm text-gray-600">
+                      {abertura.descricao}
+                    </p>
                   </td>
                   <td className="p-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-interface font-semibold ${getStatusColor(abertura.status)}`}>
@@ -232,13 +240,26 @@ export default function GerenciamentoAberturas() {
                   </td>
                   <td className="p-4">
                     <div className="flex items-center justify-end gap-2">
+                      <button 
+                        onClick={() => handleViewLicoes(abertura)}
+                        className="p-2 text-gray-400 hover:text-purple-600 rounded-lg hover:bg-purple-50 transition-colors"
+                        title="Ver Lições"
+                      >
+                        <PlayCircle size={16} />
+                      </button>
                       <button className="p-2 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
                         <Eye size={16} />
                       </button>
-                      <button className="p-2 text-gray-400 hover:text-green-600 rounded-lg hover:bg-green-50 transition-colors">
+                      <button 
+                        onClick={() => handleEditAbertura(abertura)}
+                        className="p-2 text-gray-400 hover:text-green-600 rounded-lg hover:bg-green-50 transition-colors"
+                      >
                         <Edit size={16} />
                       </button>
-                      <button className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors">
+                      <button 
+                        onClick={() => handleDeleteAbertura(abertura.id)}
+                        className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                      >
                         <Trash2 size={16} />
                       </button>
                       <button className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors">
@@ -276,7 +297,7 @@ export default function GerenciamentoAberturas() {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-body text-sm text-gray-600">Total</p>
-              <p className="font-title text-2xl font-bold text-gray-900">{aberturas.length}</p>
+              <p className="font-title text-2xl font-bold text-gray-900">{stats.total}</p>
             </div>
             <BookOpen className="text-blue-500" size={24} />
           </div>
@@ -287,7 +308,7 @@ export default function GerenciamentoAberturas() {
             <div>
               <p className="font-body text-sm text-gray-600">Ativas</p>
               <p className="font-title text-2xl font-bold text-green-600">
-                {aberturas.filter(a => a.status === 'Ativo').length}
+                {stats.ativas}
               </p>
             </div>
             <Target className="text-green-500" size={24} />
@@ -299,7 +320,7 @@ export default function GerenciamentoAberturas() {
             <div>
               <p className="font-body text-sm text-gray-600">Rascunhos</p>
               <p className="font-title text-2xl font-bold text-yellow-600">
-                {aberturas.filter(a => a.status === 'Rascunho').length}
+                {stats.rascunhos}
               </p>
             </div>
             <Edit className="text-yellow-500" size={24} />
@@ -309,15 +330,31 @@ export default function GerenciamentoAberturas() {
         <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-body text-sm text-gray-600">Total Lições</p>
-              <p className="font-title text-2xl font-bold text-purple-600">
-                {aberturas.reduce((total, a) => total + a.licoes, 0)}
+              <p className="font-body text-sm text-gray-600">Arquivadas</p>
+              <p className="font-title text-2xl font-bold text-gray-600">
+                {stats.arquivadas}
               </p>
             </div>
-            <Zap className="text-purple-500" size={24} />
+            <Zap className="text-gray-500" size={24} />
           </div>
         </div>
       </div>
+
+      {/* Formulário Modal */}
+      <AberturaForm
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        onSave={handleSaveAbertura}
+        initialData={editingAbertura}
+        mode={formMode}
+      />
+
+      {/* Modal de Lições */}
+      <AberturaLicoesModal
+        isOpen={isLicoesModalOpen}
+        onClose={handleCloseLicoesModal}
+        abertura={selectedAbertura}
+      />
     </div>
   );
 } 
