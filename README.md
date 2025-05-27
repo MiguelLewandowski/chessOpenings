@@ -1,36 +1,146 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ChessOpenings
 
-## Getting Started
+**ChessOpenings** é uma plataforma para jogadores de xadrez praticarem aberturas de maneira interativa e personalizada, inspirada no formato do Duolingo.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🧠 Objetivos
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Ensinar aberturas de xadrez com base no estilo do jogador.
+- Tornar o aprendizado de xadrez divertido, visual e adaptativo.
+- Criar uma rotina de estudos interativa para todos os níveis.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🚀 Tecnologias
 
-## Learn More
+- **Next.js** com **TypeScript**
+- **TailwindCSS** (Mobile First)
+- **Armazenamento local via JSON** (login, cadastro, lições, aberturas, exercícios, quiz)
+- **Animações e tabuleiro interativo** com:
+  - [`chessboard.js`](https://chessboardjs.com) ou [`react-chessboard`](https://www.npmjs.com/package/react-chessboard)
+  - [`framer-motion`](https://www.framer.com/motion/)
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ✅ Boas Práticas
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Princípios: **SOLID**, **KISS**, **YAGNI**
+- Separação clara de responsabilidades
+- Componentes e funções pequenas e reutilizáveis
+- Código limpo, modularizado e legível
+- Comentários apenas quando a lógica for complexa
+- UI/UX com padrão **2025**, moderna, responsiva e intuitiva
+- Padrão de desenvolvimento sênior em Next.js/React
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🧩 Funcionalidades do MVP
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Quiz de estilo para definir o arquétipo do jogador
+- Sistema de recomendação de aberturas com base no resultado
+- Trilhas de lições inspiradas no Duolingo (tema de xadrez)
+- Lições interativas com tabuleiro
+- Painel admin (baseado em JSON) para cadastro de:
+  - Lições
+  - Aberturas
+  - Exercícios
+  - Perguntas do quiz
+
+---
+
+## 📚 Tipos de Lições
+
+1. **Introdução à abertura**: sequência inicial com explicações
+2. **Reações do adversário**: respostas comuns e como lidar
+3. **Árvore de possibilidades** da abertura
+4. **Erros comuns** (do jogador e do oponente) e punições
+5. **Exercícios diversos**:
+   - Estrutura de peões no meio-jogo
+   - Estrutura de peões no final de jogo
+   - Identificação de planos
+6. **Dois tipos principais de exercícios**:
+   - **Visualização**: o usuário apenas avança os lances com explicações
+   - **Interativo**: o usuário deve acertar o lance certo para progredir
+
+> **Importante**: 
+> Cada exercício terá feedback visual com framer-motion. Ao acertar, o sistema exibe um efeito verde e permite avançar.
+
+---
+
+## 🔄 Fluxo do Usuário
+
+1. Acessa a **página inicial** com login/cadastro
+2. Após autenticação, faz o **quiz de estilo**
+3. Recebe o **arquétipo do jogador**, com:
+   - Aberturas recomendadas
+   - Jogadores famosos com mesmo perfil
+4. Pode aceitar sugestão ou navegar pela **galeria de aberturas**
+5. Escolhe uma abertura e entra na **trilha de lições**
+6. A cada lição:
+   - Pode assistir explicações ou resolver interativamente os exercícios
+
+---
+
+## 🎨 Identidade Visual
+
+### Fontes
+
+| Uso                      | Fonte              |
+|--------------------------|--------------------|
+| Títulos                  | Montserrat Bold    |
+| Textos                   | Nunito Regular     |
+| Gamificação/Interfaces   | Poppins SemiBold   |
+
+### Paleta de Cores
+
+| Categoria     | Nome         | Hex       | Uso                               |
+|---------------|--------------|-----------|------------------------------------|
+| **Primária**  | Preto        | #1C1C1E   | Texto principal, ícones            |
+|               | Branco       | #FFFFFF   | Fundos, textos claros              |
+|               | Azul Real    | #005FAD   | Botões principais, CTAs            |
+| **Secundária**| Verde Claro  | #7ED957   | Feedback positivo, gamificação     |
+|               | Cinza Médio  | #B3B3B3   | Texto secundário, ícones           |
+|               | Cinza Escuro | #3C3C3C   | Fundos de seções, cards            |
+| **Acento**    | Amarelo Ouro | #FFD700   | Medalhas, conquistas               |
+|               | Vermelho     | #E63946   | Erros, notificações                |
+| **BGs**       | Azul Claro   | #E1F5FF   | Telas de boas-vindas, destaques    |
+|               | Cinza Claro  | #F5F5F5   | Fundos neutros, cartões            |
+
+---
+
+## 🛠 Painel Admin (JSON)
+
+- **Quiz**: perguntas e respostas com pontuação por arquétipo
+- **Aberturas**: nome, FENs, tipo, estilo (tático/posicional)
+- **Lições**: tipo (visual/interativo), sequência de lances, explicações
+- **Exercícios**: lances certos/errados, feedback, estrutura de peões, contexto do lance
+
+---
+
+## 📦 Estrutura esperada de arquivos (sugestão)
+
+/app
+/components
+/features
+/hooks
+/pages
+/styles
+/utils
+/data (jsons)
+
+yaml
+Copiar
+Editar
+
+---
+
+## 🧪 Observações Finais
+
+- Interface deve funcionar perfeitamente no **mobile** (responsividade total).
+- Toda lógica deve ser pensada para **manutenibilidade e escalabilidade**.
+- Código deve refletir a qualidade de um **desenvolvedor sênior**.
+
+---
+
+> Projeto idealizado para revolucionar o ensino de aberturas no xadrez com um sistema divertido, educativo e altamente customizável
