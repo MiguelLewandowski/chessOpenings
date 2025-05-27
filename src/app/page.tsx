@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { 
   Brain, 
   Target, 
@@ -36,6 +37,12 @@ export default function Home() {
               Chess<span className="text-blue-600">Openings</span>
             </div>
             <div className="flex items-center gap-4">
+              <Link
+                href="/admin"
+                className="font-interface text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Admin
+              </Link>
               <button className="font-interface text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
                 Entrar
               </button>
