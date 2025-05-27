@@ -51,7 +51,7 @@ export default function AdminLayout({
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 lg:flex">
       {/* Sidebar Mobile Overlay */}
       {sidebarOpen && (
         <div
@@ -64,11 +64,11 @@ export default function AdminLayout({
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-xl transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-xl transform transition-transform duration-300 ease-in-out lg:relative lg:transform-none lg:z-auto ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
-        <div className="flex h-full flex-col">
+        <div className="flex h-screen flex-col lg:h-full">
           {/* Header do Sidebar */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
             <div className="flex items-center">
@@ -138,7 +138,7 @@ export default function AdminLayout({
       </aside>
 
       {/* Conteúdo Principal */}
-      <div className="lg:pl-72 min-h-screen">
+      <div className="flex-1 min-h-screen lg:min-h-0">
         {/* Header Mobile */}
         <header className="bg-white shadow-sm border-b border-gray-200 lg:hidden sticky top-0 z-40">
           <div className="flex items-center justify-between p-4">
@@ -156,7 +156,7 @@ export default function AdminLayout({
         </header>
 
         {/* Conteúdo da Página */}
-        <main className="p-4 sm:p-6 lg:p-8">
+        <main className="p-4 sm:p-6 lg:p-8 min-h-screen lg:min-h-0">
           {children}
         </main>
       </div>
