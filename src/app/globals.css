@@ -1,15 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Paleta de Cores do ChessOpenings */
+  --primary-black: #1C1C1E;
+  --primary-white: #FFFFFF;
+  --primary-blue: #005FAD;
+  --secondary-green: #7ED957;
+  --secondary-gray-medium: #B3B3B3;
+  --secondary-gray-dark: #3C3C3C;
+  --accent-gold: #FFD700;
+  --accent-red: #E63946;
+  --bg-blue-light: #E1F5FF;
+  --bg-gray-light: #F5F5F5;
+
+  /* Configuração de fontes */
+  --font-title: var(--font-montserrat);
+  --font-body: var(--font-nunito);
+  --font-interface: var(--font-poppins);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--primary-white);
+  --color-foreground: var(--primary-black);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-interface);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -20,7 +34,20 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--primary-white);
+  color: var(--primary-black);
+  font-family: var(--font-body);
+}
+
+/* Classes utilitárias para as fontes */
+.font-title {
+  font-family: var(--font-title);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.font-interface {
+  font-family: var(--font-interface);
 }
