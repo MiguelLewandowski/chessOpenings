@@ -1,9 +1,12 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { type Exercicio, type ExercicioFormData } from '@/types/exercicios';
 
 export type { Exercicio, ExercicioFormData };
 
-// Dados mockados iniciais
+// Constante para a chave do localStorage
+const STORAGE_KEY = 'exercicios';
+
+// Dados mockados iniciais (fallback para novos usuários)
 const initialData: Exercicio[] = [
   {
     id: '1',
@@ -205,16 +208,61 @@ const initialData: Exercicio[] = [
   }
 ];
 
+// Função auxiliar para carregar dados do localStorage
+const loadFromStorage = (): Exercicio[] => {
+  if (typeof window === 'undefined') return initialData;
+  
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return Array.isArray(parsed) ? parsed : initialData;
+    }
+  } catch (error) {
+    console.warn('Erro ao carregar exercícios do localStorage:', error);
+  }
+  
+  return initialData;
+};
+
+// Função auxiliar para salvar dados no localStorage
+const saveToStorage = (data: Exercicio[]): void => {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.error('Erro ao salvar exercícios no localStorage:', error);
+  }
+};
+
 export function useExercicios() {
-  const [exercicios, setExercicios] = useState<Exercicio[]>(initialData);
+  const [exercicios, setExercicios] = useState<Exercicio[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Carregar dados do localStorage na inicialização
+  useEffect(() => {
+    const storedData = loadFromStorage();
+    setExercicios(storedData);
+    
+    // Se não há dados no localStorage, salva os dados iniciais
+    if (typeof window !== 'undefined' && !localStorage.getItem(STORAGE_KEY)) {
+      saveToStorage(storedData);
+    }
+  }, []);
 
   // Função para gerar ID único
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
   // Simular delay de API
   const simulateApiDelay = () => new Promise(resolve => setTimeout(resolve, 500));
+
+  // Função auxiliar para atualizar estado e localStorage
+  const updateStateAndStorage = useCallback((newData: Exercicio[]) => {
+    setExercicios(newData);
+    saveToStorage(newData);
+  }, []);
 
   // Criar novo exercício
   const createExercicio = useCallback(async (data: ExercicioFormData): Promise<Exercicio> => {
@@ -231,7 +279,9 @@ export function useExercicios() {
         atualizadoEm: new Date().toISOString().split('T')[0]
       };
 
-      setExercicios(prev => [novoExercicio, ...prev]);
+      const newExercicios = [novoExercicio, ...exercicios];
+      updateStateAndStorage(newExercicios);
+      
       return novoExercicio;
     } catch {
       const errorMessage = 'Erro ao criar exercício';
@@ -240,7 +290,7 @@ export function useExercicios() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [exercicios, updateStateAndStorage]);
 
   // Atualizar exercício existente
   const updateExercicio = useCallback(async (id: string, data: ExercicioFormData): Promise<Exercicio> => {
@@ -261,9 +311,8 @@ export function useExercicios() {
         atualizadoEm: new Date().toISOString().split('T')[0]
       };
 
-      setExercicios(prev => 
-        prev.map(e => e.id === id ? exercicioAtualizado : e)
-      );
+      const newExercicios = exercicios.map(e => e.id === id ? exercicioAtualizado : e);
+      updateStateAndStorage(newExercicios);
       
       return exercicioAtualizado;
     } catch (err) {
@@ -273,7 +322,7 @@ export function useExercicios() {
     } finally {
       setLoading(false);
     }
-  }, [exercicios]);
+  }, [exercicios, updateStateAndStorage]);
 
   // Deletar exercício
   const deleteExercicio = useCallback(async (id: string): Promise<void> => {
@@ -283,7 +332,8 @@ export function useExercicios() {
     try {
       await simulateApiDelay();
       
-      setExercicios(prev => prev.filter(e => e.id !== id));
+      const newExercicios = exercicios.filter(e => e.id !== id);
+      updateStateAndStorage(newExercicios);
     } catch {
       const errorMessage = 'Erro ao deletar exercício';
       setError(errorMessage);
@@ -291,7 +341,7 @@ export function useExercicios() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [exercicios, updateStateAndStorage]);
 
   // Buscar exercício por ID
   const getExercicio = useCallback((id: string): Exercicio | undefined => {

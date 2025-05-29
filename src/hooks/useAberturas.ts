@@ -1,9 +1,12 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { type Abertura, type AberturaFormData } from '@/types/aberturas';
 
 export type { Abertura, AberturaFormData };
 
-// Dados mockados iniciais
+// Constante para a chave do localStorage
+const STORAGE_KEY = 'aberturas';
+
+// Dados mockados iniciais (fallback para novos usuários)
 const initialData: Abertura[] = [
   {
     id: '1',
@@ -51,16 +54,61 @@ const initialData: Abertura[] = [
   }
 ];
 
+// Função auxiliar para carregar dados do localStorage
+const loadFromStorage = (): Abertura[] => {
+  if (typeof window === 'undefined') return initialData;
+  
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return Array.isArray(parsed) ? parsed : initialData;
+    }
+  } catch (error) {
+    console.warn('Erro ao carregar aberturas do localStorage:', error);
+  }
+  
+  return initialData;
+};
+
+// Função auxiliar para salvar dados no localStorage
+const saveToStorage = (data: Abertura[]): void => {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.error('Erro ao salvar aberturas no localStorage:', error);
+  }
+};
+
 export function useAberturas() {
-  const [aberturas, setAberturas] = useState<Abertura[]>(initialData);
+  const [aberturas, setAberturas] = useState<Abertura[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Carregar dados do localStorage na inicialização
+  useEffect(() => {
+    const storedData = loadFromStorage();
+    setAberturas(storedData);
+    
+    // Se não há dados no localStorage, salva os dados iniciais
+    if (typeof window !== 'undefined' && !localStorage.getItem(STORAGE_KEY)) {
+      saveToStorage(storedData);
+    }
+  }, []);
 
   // Função para gerar ID único
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
   // Simular delay de API
   const simulateApiDelay = () => new Promise(resolve => setTimeout(resolve, 500));
+
+  // Função auxiliar para atualizar estado e localStorage
+  const updateStateAndStorage = useCallback((newData: Abertura[]) => {
+    setAberturas(newData);
+    saveToStorage(newData);
+  }, []);
 
   // Criar nova abertura
   const createAbertura = useCallback(async (data: AberturaFormData): Promise<Abertura> => {
@@ -77,7 +125,9 @@ export function useAberturas() {
         atualizadoEm: new Date().toISOString().split('T')[0]
       };
 
-      setAberturas(prev => [novaAbertura, ...prev]);
+      const newAberturas = [novaAbertura, ...aberturas];
+      updateStateAndStorage(newAberturas);
+      
       return novaAbertura;
     } catch {
       const errorMessage = 'Erro ao criar abertura';
@@ -86,7 +136,7 @@ export function useAberturas() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [aberturas, updateStateAndStorage]);
 
   // Atualizar abertura existente
   const updateAbertura = useCallback(async (id: string, data: AberturaFormData): Promise<Abertura> => {
@@ -107,9 +157,8 @@ export function useAberturas() {
         atualizadoEm: new Date().toISOString().split('T')[0]
       };
 
-      setAberturas(prev => 
-        prev.map(a => a.id === id ? aberturaAtualizada : a)
-      );
+      const newAberturas = aberturas.map(a => a.id === id ? aberturaAtualizada : a);
+      updateStateAndStorage(newAberturas);
       
       return aberturaAtualizada;
     } catch (err) {
@@ -119,7 +168,7 @@ export function useAberturas() {
     } finally {
       setLoading(false);
     }
-  }, [aberturas]);
+  }, [aberturas, updateStateAndStorage]);
 
   // Deletar abertura
   const deleteAbertura = useCallback(async (id: string): Promise<void> => {
@@ -129,7 +178,8 @@ export function useAberturas() {
     try {
       await simulateApiDelay();
       
-      setAberturas(prev => prev.filter(a => a.id !== id));
+      const newAberturas = aberturas.filter(a => a.id !== id);
+      updateStateAndStorage(newAberturas);
     } catch {
       const errorMessage = 'Erro ao deletar abertura';
       setError(errorMessage);
@@ -137,7 +187,7 @@ export function useAberturas() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [aberturas, updateStateAndStorage]);
 
   // Buscar abertura por ID
   const getAbertura = useCallback((id: string): Abertura | undefined => {
