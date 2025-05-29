@@ -136,6 +136,32 @@ export function useLicoes() {
     }
   }, [licoes, updateStateAndStorage]);
 
+  // Deletar todas as lições de uma abertura (para exclusão em cascata)
+  const deleteLicoesByAbertura = useCallback(async (aberturaId: string): Promise<string[]> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      await simulateApiDelay();
+      
+      // Encontrar todas as lições da abertura
+      const licoesParaDeletar = licoes.filter(l => l.aberturaId === aberturaId);
+      const idsLicoesDeletadas = licoesParaDeletar.map(l => l.id);
+      
+      // Filtrar para manter apenas as lições que não são da abertura
+      const newLicoes = licoes.filter(l => l.aberturaId !== aberturaId);
+      updateStateAndStorage(newLicoes);
+      
+      return idsLicoesDeletadas;
+    } catch {
+      const errorMessage = 'Erro ao deletar lições da abertura';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [licoes, updateStateAndStorage]);
+
   // Buscar lição por ID
   const getLicao = useCallback((id: string): Licao | undefined => {
     return licoes.find(l => l.id === id);
@@ -194,6 +220,7 @@ export function useLicoes() {
     createLicao,
     updateLicao,
     deleteLicao,
+    deleteLicoesByAbertura,
     getLicao,
     filterLicoes,
     getLicoesByAbertura,

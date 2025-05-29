@@ -136,6 +136,26 @@ export function useExercicios() {
     }
   }, [exercicios, updateStateAndStorage]);
 
+  // Deletar todos os exercícios de lições específicas (para exclusão em cascata)
+  const deleteExerciciosByLicoes = useCallback(async (licaoIds: string[]): Promise<void> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      await simulateApiDelay();
+      
+      // Filtrar para manter apenas exercícios que não pertencem às lições deletadas
+      const newExercicios = exercicios.filter(e => !licaoIds.includes(e.licaoId));
+      updateStateAndStorage(newExercicios);
+    } catch {
+      const errorMessage = 'Erro ao deletar exercícios das lições';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [exercicios, updateStateAndStorage]);
+
   // Buscar exercício por ID
   const getExercicio = useCallback((id: string): Exercicio | undefined => {
     return exercicios.find(e => e.id === id);
@@ -198,6 +218,7 @@ export function useExercicios() {
     createExercicio,
     updateExercicio,
     deleteExercicio,
+    deleteExerciciosByLicoes,
     getExercicio,
     filterExercicios,
     getExerciciosByLicao,

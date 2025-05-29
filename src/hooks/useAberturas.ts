@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { type Abertura, type AberturaFormData } from '@/types/aberturas';
+import { deleteAberturaWithCascade } from '@/utils/localStorage';
 
 export type { Abertura, AberturaFormData };
 
@@ -117,7 +118,7 @@ export function useAberturas() {
     }
   }, [aberturas, updateStateAndStorage]);
 
-  // Deletar abertura
+  // Deletar abertura com exclusão em cascata
   const deleteAbertura = useCallback(async (id: string): Promise<void> => {
     setLoading(true);
     setError(null);
@@ -125,16 +126,27 @@ export function useAberturas() {
     try {
       await simulateApiDelay();
       
-      const newAberturas = aberturas.filter(a => a.id !== id);
-      updateStateAndStorage(newAberturas);
-    } catch {
-      const errorMessage = 'Erro ao deletar abertura';
+      // Usar a função de exclusão em cascata
+      const resultado = await deleteAberturaWithCascade(id);
+      
+      // Recarregar dados do localStorage para manter o estado sincronizado
+      const updatedAberturas = loadFromStorage();
+      setAberturas(updatedAberturas);
+      
+      // Log para feedback (pode ser usado para notificações)
+      console.log(`Abertura excluída com sucesso:
+        - 1 abertura removida
+        - ${resultado.licoesRemovidas} lições removidas
+        - ${resultado.exerciciosRemovidos} exercícios removidos`);
+        
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao deletar abertura';
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, [aberturas, updateStateAndStorage]);
+  }, []);
 
   // Buscar abertura por ID
   const getAbertura = useCallback((id: string): Abertura | undefined => {
