@@ -9,7 +9,8 @@ import {
   RefreshCw,
   CheckCircle,
   AlertCircle,
-  Zap
+  Zap,
+  AlertTriangle
 } from 'lucide-react';
 import { 
   getStorageStats, 
@@ -17,7 +18,9 @@ import {
   clearChessOpeningsData,
   exportData,
   importData,
-  type ExportedData
+  type ExportedData,
+  migrateLicoesVisualizacaoToExercicios,
+  verificarMigracaoNecessaria
 } from '@/utils/localStorage';
 import { useAberturas } from '@/hooks/useAberturas';
 import { useLicoes } from '@/hooks/useLicoes';
@@ -165,6 +168,22 @@ export default function LocalStorageDebug() {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
+
+  // Função para executar migração
+  const executarMigracao = () => {
+    if (confirm('⚠️ MIGRAÇÃO IMPORTANTE\n\nIsto irá converter todas as lições do tipo "Visualização" em exercícios passivos.\n\nAs lições serão simplificadas para apenas conteúdo conceitual.\n\nEsta operação não pode ser desfeita. Continuar?')) {
+      const resultado = migrateLicoesVisualizacaoToExercicios();
+      
+      if (resultado.erro) {
+        alert(`Erro durante migração: ${resultado.erro}`);
+      } else {
+        alert(`✅ Migração concluída!\n\n${resultado.migradas} lições migradas\n${resultado.exerciciosCriados} exercícios criados\n\nRecarregue a página para ver as mudanças.`);
+        window.location.reload();
+      }
+    }
+  };
+
+  const migracaoNecessaria = verificarMigracaoNecessaria();
 
   if (!stats || !storedData) {
     return (
@@ -375,6 +394,44 @@ export default function LocalStorageDebug() {
           </div>
         </div>
       </div>
+
+      {/* Migração */}
+      {migracaoNecessaria && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0">
+                <AlertTriangle className="w-6 h-6 text-yellow-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-yellow-800">
+                  Migração Necessária
+                </h3>
+                <p className="text-sm text-yellow-700 mt-1">
+                  Foram detectadas lições do tipo &ldquo;Visualização&rdquo; que precisam ser migradas para a nova estrutura.
+                </p>
+                <div className="mt-3">
+                  <p className="text-sm text-yellow-700">
+                    <strong>O que será feito:</strong>
+                  </p>
+                  <ul className="list-disc list-inside text-sm text-yellow-700 mt-1 space-y-1">
+                    <li>Lições &ldquo;Visualização&rdquo; → Exercícios &ldquo;Passivos&rdquo;</li>
+                    <li>Movimentos migrados para sequência de exercícios</li>
+                    <li>Lições simplificadas para conteúdo conceitual</li>
+                    <li>Manutenção da hierarquia e relacionamentos</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={executarMigracao}
+              className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium"
+            >
+              Executar Migração
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Ações */}
       <div className="flex flex-wrap gap-3">

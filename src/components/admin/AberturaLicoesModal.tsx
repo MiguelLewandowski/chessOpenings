@@ -6,9 +6,7 @@ import {
   Plus,
   Edit,
   Trash2,
-  Eye,
   BookOpen,
-  Play,
   Clock,
   Target,
   Loader2,
@@ -36,22 +34,6 @@ export default function AberturaLicoesModal({
 
   // Filtrar lições desta abertura
   const licoesAbertura = licoes.filter(licao => licao.aberturaId === abertura.id);
-
-  const getTipoIcon = (tipo: string) => {
-    switch (tipo) {
-      case 'Visualização': return <Eye className="text-blue-500" size={16} />;
-      case 'Interativo': return <Play className="text-green-500" size={16} />;
-      default: return <BookOpen className="text-gray-500" size={16} />;
-    }
-  };
-
-  const getTipoColor = (tipo: string) => {
-    switch (tipo) {
-      case 'Visualização': return 'bg-blue-100 text-blue-700';
-      case 'Interativo': return 'bg-green-100 text-green-700';
-      default: return 'bg-gray-100 text-gray-700';
-    }
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -214,9 +196,9 @@ export default function AberturaLicoesModal({
                               {licao.titulo}
                             </h4>
                             <div className="flex items-center gap-2">
-                              {getTipoIcon(licao.tipo)}
-                              <span className={`px-2 py-1 rounded-full text-xs font-interface font-semibold ${getTipoColor(licao.tipo)}`}>
-                                {licao.tipo}
+                              <BookOpen className="text-blue-500" size={16} />
+                              <span className="px-2 py-1 rounded-full text-xs font-interface font-semibold bg-blue-100 text-blue-700">
+                                Conceitual
                               </span>
                             </div>
                             <span className={`px-2 py-1 rounded-full text-xs font-interface font-semibold ${getStatusColor(licao.status)}`}>
@@ -252,7 +234,7 @@ export default function AberturaLicoesModal({
                             className="p-2 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
                             title="Visualizar lição"
                           >
-                            <Eye size={16} />
+                            <BookOpen size={16} />
                           </button>
                           <button
                             onClick={() => handleEditLicao(licao.id)}
