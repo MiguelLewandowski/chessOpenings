@@ -7,14 +7,14 @@ import {
   Search,
   Edit,
   Trash2,
-  Eye,
   BookOpen,
-  Play,
   Clock,
   Target,
   MoreVertical,
   Loader2,
-  X
+  X,
+  CheckCircle,
+  Info
 } from 'lucide-react';
 import { useLicoes, type Licao, type LicaoFormData } from '@/hooks/useLicoes';
 import { useAberturas } from '@/hooks/useAberturas';
@@ -24,7 +24,6 @@ export default function GerenciamentoLicoes() {
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterAbertura, setFilterAbertura] = useState<string>('all');
-  const [filterTipo, setFilterTipo] = useState<string>('all');
   const [filterDificuldade, setFilterDificuldade] = useState<string>('all');
   
   // Estados para o formulário
@@ -57,16 +56,8 @@ export default function GerenciamentoLicoes() {
         descricao: '',
         aberturaId: aberturaIdParam || '',
         ordem: 1,
-        tipo: 'Visualização',
         dificuldade: 'Iniciante',
-        status: 'Rascunho',
-        conteudo: {
-          introducao: '',
-          explicacao: '',
-          movimentos: [],
-          dicas: [],
-          conclusao: ''
-        },
+        status: 'Ativo',
         exercicios: [],
         estimativaTempo: 15,
         pontuacao: 100,
@@ -93,7 +84,7 @@ export default function GerenciamentoLicoes() {
   }, [searchParams]);
 
   // Dados filtrados usando o hook
-  const licoesFiltradas = filterLicoes(searchTerm, filterAbertura, filterTipo, filterDificuldade);
+  const licoesFiltradas = filterLicoes(searchTerm, filterAbertura, filterDificuldade);
   const stats = getStats();
 
   const getStatusColor = (status: string) => {
@@ -101,22 +92,6 @@ export default function GerenciamentoLicoes() {
       case 'Ativo': return 'bg-green-100 text-green-700';
       case 'Rascunho': return 'bg-yellow-100 text-yellow-700';
       case 'Arquivado': return 'bg-gray-100 text-gray-700';
-      default: return 'bg-gray-100 text-gray-700';
-    }
-  };
-
-  const getTipoIcon = (tipo: string) => {
-    switch (tipo) {
-      case 'Visualização': return <Eye className="text-blue-500" size={16} />;
-      case 'Interativo': return <Play className="text-green-500" size={16} />;
-      default: return <BookOpen className="text-gray-500" size={16} />;
-    }
-  };
-
-  const getTipoColor = (tipo: string) => {
-    switch (tipo) {
-      case 'Visualização': return 'bg-blue-100 text-blue-700';
-      case 'Interativo': return 'bg-green-100 text-green-700';
       default: return 'bg-gray-100 text-gray-700';
     }
   };
@@ -155,10 +130,8 @@ export default function GerenciamentoLicoes() {
       descricao: licao.descricao,
       aberturaId: licao.aberturaId,
       ordem: licao.ordem,
-      tipo: licao.tipo,
       dificuldade: licao.dificuldade,
       status: licao.status,
-      conteudo: licao.conteudo,
       exercicios: licao.exercicios,
       estimativaTempo: licao.estimativaTempo,
       pontuacao: licao.pontuacao,
@@ -237,7 +210,7 @@ export default function GerenciamentoLicoes() {
       </div>
 
       {/* Estatísticas Rápidas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
@@ -251,24 +224,12 @@ export default function GerenciamentoLicoes() {
         <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-body text-sm text-gray-600">Visualização</p>
-              <p className="font-title text-2xl font-bold text-blue-600">
-                {stats.visualizacao}
-              </p>
-            </div>
-            <Eye className="text-blue-500" size={24} />
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-body text-sm text-gray-600">Interativas</p>
+              <p className="font-body text-sm text-gray-600">Ativas</p>
               <p className="font-title text-2xl font-bold text-green-600">
-                {stats.interativo}
+                {stats.ativas}
               </p>
             </div>
-            <Play className="text-green-500" size={24} />
+            <CheckCircle className="text-green-500" size={24} />
           </div>
         </div>
         
@@ -318,16 +279,6 @@ export default function GerenciamentoLicoes() {
             </select>
 
             <select
-              value={filterTipo}
-              onChange={(e) => setFilterTipo(e.target.value)}
-              className="px-4 py-3 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">Todos os tipos</option>
-              <option value="Visualização">Visualização</option>
-              <option value="Interativo">Interativo</option>
-            </select>
-
-            <select
               value={filterDificuldade}
               onChange={(e) => setFilterDificuldade(e.target.value)}
               className="px-4 py-3 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500"
@@ -349,7 +300,6 @@ export default function GerenciamentoLicoes() {
               <tr>
                 <th className="text-left p-4 font-interface font-semibold text-gray-700">Lição</th>
                 <th className="text-left p-4 font-interface font-semibold text-gray-700">Abertura</th>
-                <th className="text-left p-4 font-interface font-semibold text-gray-700">Tipo</th>
                 <th className="text-left p-4 font-interface font-semibold text-gray-700">Dificuldade</th>
                 <th className="text-left p-4 font-interface font-semibold text-gray-700">Tempo</th>
                 <th className="text-left p-4 font-interface font-semibold text-gray-700">Exercícios</th>
@@ -382,14 +332,6 @@ export default function GerenciamentoLicoes() {
                     </span>
                   </td>
                   <td className="p-4">
-                    <div className="flex items-center gap-2">
-                      {getTipoIcon(licao.tipo)}
-                      <span className={`px-2 py-1 rounded-full text-xs font-interface font-semibold ${getTipoColor(licao.tipo)}`}>
-                        {licao.tipo}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="p-4">
                     <span className={`font-body text-sm font-semibold ${getDificuldadeColor(licao.dificuldade)}`}>
                       {licao.dificuldade}
                     </span>
@@ -414,7 +356,7 @@ export default function GerenciamentoLicoes() {
                   <td className="p-4">
                     <div className="flex items-center justify-end gap-2">
                       <button className="p-2 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
-                        <Eye size={16} />
+                        <Info size={16} />
                       </button>
                       <button 
                         onClick={() => handleEditLicao(licao)}
