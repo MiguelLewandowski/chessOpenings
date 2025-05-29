@@ -176,4 +176,51 @@ export const importData = (exportedData: ExportedData): boolean => {
     console.error('Erro ao importar dados:', error);
     return false;
   }
+};
+
+// Função para exclusão em cascata de abertura
+export const deleteAberturaWithCascade = async (aberturaId: string) => {
+  try {
+    // 1. Carregar dados atuais
+    const licoes = loadFromLocalStorage<Array<{id: string; aberturaId: string; licaoId?: string}>>('licoes', []);
+    const exercicios = loadFromLocalStorage<Array<{id: string; licaoId: string}>>('exercicios', []);
+    const aberturas = loadFromLocalStorage<Array<{id: string}>>('aberturas', []);
+
+    // 2. Encontrar lições relacionadas à abertura
+    const licoesRelacionadas = licoes.filter(licao => licao.aberturaId === aberturaId);
+    const idsLicoesRelacionadas = licoesRelacionadas.map(licao => licao.id);
+
+    // 3. Encontrar exercícios relacionados às lições
+    const exerciciosRelacionados = exercicios.filter(exercicio => 
+      idsLicoesRelacionadas.includes(exercicio.licaoId)
+    );
+
+    // 4. Remover exercícios relacionados
+    const exerciciosRestantes = exercicios.filter(exercicio => 
+      !idsLicoesRelacionadas.includes(exercicio.licaoId)
+    );
+
+    // 5. Remover lições relacionadas
+    const licoesRestantes = licoes.filter(licao => licao.aberturaId !== aberturaId);
+
+    // 6. Remover a abertura
+    const aberturasRestantes = aberturas.filter(abertura => abertura.id !== aberturaId);
+
+    // 7. Salvar todos os dados atualizados
+    saveToLocalStorage('exercicios', exerciciosRestantes);
+    saveToLocalStorage('licoes', licoesRestantes);
+    saveToLocalStorage('aberturas', aberturasRestantes);
+
+    // 8. Retornar estatísticas da exclusão
+    return {
+      aberturaRemovida: true,
+      licoesRemovidas: licoesRelacionadas.length,
+      exerciciosRemovidos: exerciciosRelacionados.length,
+      idsLicoesRemovidas: idsLicoesRelacionadas,
+      idsExerciciosRemovidos: exerciciosRelacionados.map(e => e.id)
+    };
+  } catch (error) {
+    console.error('Erro na exclusão em cascata:', error);
+    throw new Error('Falha ao excluir abertura e dados relacionados');
+  }
 }; 
