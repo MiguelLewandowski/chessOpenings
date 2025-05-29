@@ -8,7 +8,8 @@ import {
   Trash2, 
   RefreshCw,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Zap
 } from 'lucide-react';
 import { 
   getStorageStats, 
@@ -22,12 +23,32 @@ import { useAberturas } from '@/hooks/useAberturas';
 import { useLicoes } from '@/hooks/useLicoes';
 import { useExercicios } from '@/hooks/useExercicios';
 
+// Dados de exemplo para popular o sistema (opcionais)
+const exemploAberturas = [
+  {
+    nome: 'Abertura Italiana',
+    categoria: 'Tática' as const,
+    dificuldade: 'Iniciante' as const,
+    movimentos: ['e4', 'e5', 'Nf3', 'Nc6', 'Bc4'],
+    descricao: 'Uma das aberturas mais antigas e clássicas do xadrez',
+    status: 'Ativo' as const,
+  },
+  {
+    nome: 'Defesa Siciliana',
+    categoria: 'Tática' as const,
+    dificuldade: 'Intermediário' as const,
+    movimentos: ['e4', 'c5'],
+    descricao: 'A defesa mais popular contra 1.e4',
+    status: 'Ativo' as const,
+  }
+];
+
 export default function LocalStorageDebug() {
   const [stats, setStats] = useState<ReturnType<typeof getStorageStats> | null>(null);
   const [storedData, setStoredData] = useState<ReturnType<typeof hasStoredData> | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  const { aberturas, getStats: getAberturaStats } = useAberturas();
+  const { aberturas, getStats: getAberturaStats, createAbertura } = useAberturas();
   const { licoes, getStats: getLicaoStats } = useLicoes();
   const { exercicios, getStats: getExercicioStats } = useExercicios();
 
@@ -54,6 +75,23 @@ export default function LocalStorageDebug() {
         showMessage('error', 'Erro ao limpar dados.');
       }
       updateStats();
+    }
+  };
+
+  const handlePopularExemplos = async () => {
+    if (aberturas.length > 0) {
+      if (!window.confirm('Já existem dados cadastrados. Deseja adicionar os exemplos mesmo assim?')) {
+        return;
+      }
+    }
+
+    try {
+      for (const abertura of exemploAberturas) {
+        await createAbertura(abertura);
+      }
+      showMessage('success', `${exemploAberturas.length} aberturas de exemplo adicionadas!`);
+    } catch {
+      showMessage('error', 'Erro ao adicionar dados de exemplo.');
     }
   };
 
@@ -148,6 +186,19 @@ export default function LocalStorageDebug() {
         </div>
       )}
 
+      {/* Aviso se não há dados */}
+      {aberturaStats.total === 0 && licaoStats.total === 0 && exercicioStats.total === 0 && (
+        <div className="p-4 rounded-lg mb-4 bg-yellow-50 border border-yellow-200">
+          <div className="flex items-center gap-2 text-yellow-800">
+            <AlertCircle size={16} />
+            <span className="font-medium">Sistema iniciado sem dados</span>
+          </div>
+          <p className="text-yellow-700 text-sm mt-1">
+            O sistema está vazio. Use os botões abaixo para popular com dados de exemplo ou criar conteúdo via painel administrativo.
+          </p>
+        </div>
+      )}
+
       {/* Estatísticas de Armazenamento */}
       <div className="grid md:grid-cols-2 gap-6 mb-6">
         <div className="space-y-4">
@@ -219,6 +270,14 @@ export default function LocalStorageDebug() {
         >
           <RefreshCw size={16} />
           Atualizar
+        </button>
+
+        <button
+          onClick={handlePopularExemplos}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-700 bg-purple-100 rounded-lg hover:bg-purple-200 transition-colors"
+        >
+          <Zap size={16} />
+          Popular Exemplos
         </button>
 
         <button
