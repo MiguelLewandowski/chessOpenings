@@ -11,6 +11,7 @@ import {
   Clock,
   CheckCircle2
 } from 'lucide-react';
+import LocalStorageDebug from '@/components/admin/LocalStorageDebug';
 
 export default function AdminDashboard() {
   // Dados mockados - em produção viriam de uma API
@@ -183,6 +184,9 @@ export default function AdminDashboard() {
           ))}
         </div>
       </div>
+
+      {/* Debug LocalStorage */}
+      <LocalStorageDebug />
 
       {/* Grid com Atividade Recente e Estatísticas */}
       <div className="grid lg:grid-cols-2 gap-6">
