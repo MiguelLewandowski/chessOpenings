@@ -103,7 +103,7 @@ export default function AdminLayout({
                 >
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                     isActive 
-                      ? 'bg-white bg-opacity-20' 
+                      ? 'bg-blue-700 bg-opacity-30 shadow-inner' 
                       : 'bg-gray-100 group-hover:bg-gray-200'
                   }`}>
                     <item.icon
