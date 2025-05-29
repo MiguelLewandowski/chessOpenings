@@ -1,66 +1,61 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { type Abertura, type AberturaFormData } from '@/types/aberturas';
 
 export type { Abertura, AberturaFormData };
 
-// Dados mockados iniciais
-const initialData: Abertura[] = [
-  {
-    id: '1',
-    nome: 'Abertura Italiana',
-    categoria: 'Tática',
-    dificuldade: 'Iniciante',
-    movimentos: ['e4', 'e5', 'Nf3', 'Nc6', 'Bc4'],
-    descricao: 'Uma das aberturas mais antigas e clássicas do xadrez',
-    status: 'Ativo',
-    criadoEm: '2024-01-15',
-    atualizadoEm: '2024-12-01'
-  },
-  {
-    id: '2',
-    nome: 'Defesa Siciliana',
-    categoria: 'Tática',
-    dificuldade: 'Intermediário',
-    movimentos: ['e4', 'c5'],
-    descricao: 'A defesa mais popular contra 1.e4',
-    status: 'Ativo',
-    criadoEm: '2024-02-10',
-    atualizadoEm: '2024-12-10'
-  },
-  {
-    id: '3',
-    nome: 'Gambito da Dama',
-    categoria: 'Posicional',
-    dificuldade: 'Intermediário',
-    movimentos: ['d4', 'd5', 'c4'],
-    descricao: 'Abertura posicional que visa controle central',
-    status: 'Rascunho',
-    criadoEm: '2024-03-05',
-    atualizadoEm: '2024-12-15'
-  },
-  {
-    id: '4',
-    nome: 'Abertura Inglesa',
-    categoria: 'Universal',
-    dificuldade: 'Avançado',
-    movimentos: ['c4'],
-    descricao: 'Abertura flexível com muitas transposições',
-    status: 'Ativo',
-    criadoEm: '2024-04-20',
-    atualizadoEm: '2024-12-18'
+// Constante para a chave do localStorage
+const STORAGE_KEY = 'aberturas';
+
+// Função auxiliar para carregar dados do localStorage
+const loadFromStorage = (): Abertura[] => {
+  if (typeof window === 'undefined') return [];
+  
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return Array.isArray(parsed) ? parsed : [];
+    }
+  } catch (error) {
+    console.warn('Erro ao carregar aberturas do localStorage:', error);
   }
-];
+  
+  return [];
+};
+
+// Função auxiliar para salvar dados no localStorage
+const saveToStorage = (data: Abertura[]): void => {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.error('Erro ao salvar aberturas no localStorage:', error);
+  }
+};
 
 export function useAberturas() {
-  const [aberturas, setAberturas] = useState<Abertura[]>(initialData);
+  const [aberturas, setAberturas] = useState<Abertura[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Carregar dados do localStorage na inicialização
+  useEffect(() => {
+    const storedData = loadFromStorage();
+    setAberturas(storedData);
+  }, []);
 
   // Função para gerar ID único
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
   // Simular delay de API
   const simulateApiDelay = () => new Promise(resolve => setTimeout(resolve, 500));
+
+  // Função auxiliar para atualizar estado e localStorage
+  const updateStateAndStorage = useCallback((newData: Abertura[]) => {
+    setAberturas(newData);
+    saveToStorage(newData);
+  }, []);
 
   // Criar nova abertura
   const createAbertura = useCallback(async (data: AberturaFormData): Promise<Abertura> => {
@@ -77,7 +72,9 @@ export function useAberturas() {
         atualizadoEm: new Date().toISOString().split('T')[0]
       };
 
-      setAberturas(prev => [novaAbertura, ...prev]);
+      const newAberturas = [novaAbertura, ...aberturas];
+      updateStateAndStorage(newAberturas);
+      
       return novaAbertura;
     } catch {
       const errorMessage = 'Erro ao criar abertura';
@@ -86,7 +83,7 @@ export function useAberturas() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [aberturas, updateStateAndStorage]);
 
   // Atualizar abertura existente
   const updateAbertura = useCallback(async (id: string, data: AberturaFormData): Promise<Abertura> => {
@@ -107,9 +104,8 @@ export function useAberturas() {
         atualizadoEm: new Date().toISOString().split('T')[0]
       };
 
-      setAberturas(prev => 
-        prev.map(a => a.id === id ? aberturaAtualizada : a)
-      );
+      const newAberturas = aberturas.map(a => a.id === id ? aberturaAtualizada : a);
+      updateStateAndStorage(newAberturas);
       
       return aberturaAtualizada;
     } catch (err) {
@@ -119,7 +115,7 @@ export function useAberturas() {
     } finally {
       setLoading(false);
     }
-  }, [aberturas]);
+  }, [aberturas, updateStateAndStorage]);
 
   // Deletar abertura
   const deleteAbertura = useCallback(async (id: string): Promise<void> => {
@@ -129,7 +125,8 @@ export function useAberturas() {
     try {
       await simulateApiDelay();
       
-      setAberturas(prev => prev.filter(a => a.id !== id));
+      const newAberturas = aberturas.filter(a => a.id !== id);
+      updateStateAndStorage(newAberturas);
     } catch {
       const errorMessage = 'Erro ao deletar abertura';
       setError(errorMessage);
@@ -137,7 +134,7 @@ export function useAberturas() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [aberturas, updateStateAndStorage]);
 
   // Buscar abertura por ID
   const getAbertura = useCallback((id: string): Abertura | undefined => {
