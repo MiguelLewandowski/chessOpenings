@@ -70,53 +70,63 @@ export default function AdminLayout({
       >
         <div className="flex h-screen flex-col lg:h-full">
           {/* Header do Sidebar */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
             <div className="flex items-center">
-              <h1 className="font-title text-xl font-bold text-gray-900">
+              <h1 className="font-title text-2xl font-bold text-gray-900">
                 Chess<span className="text-blue-600">Openings</span>
               </h1>
-              <span className="ml-2 bg-blue-100 text-blue-600 text-xs font-interface font-semibold px-2 py-1 rounded">
+              <span className="ml-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-xs font-interface font-bold px-3 py-1 rounded-full shadow-sm">
                 Admin
               </span>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden text-gray-400 hover:text-gray-600"
+              className="lg:hidden text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100 transition-colors"
             >
               <X size={24} />
             </button>
           </div>
 
           {/* Navegação */}
-          <nav className="flex-1 p-6 space-y-2">
+          <nav className="flex-1 px-4 py-6 space-y-3">
             {navigationItems.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`group flex items-center p-3 rounded-xl transition-all duration-200 ${
+                  className={`group flex items-center p-4 rounded-2xl transition-all duration-200 ${
                     isActive
-                      ? 'bg-blue-50 text-blue-600 border border-blue-100'
-                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg transform scale-105'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 hover:shadow-md'
                   }`}
                 >
-                  <item.icon
-                    size={20}
-                    className={`flex-shrink-0 ${
-                      isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'
-                    }`}
-                  />
-                  <div className="ml-3 flex-1">
-                    <p className="font-interface font-semibold text-sm">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                    isActive 
+                      ? 'bg-white bg-opacity-20' 
+                      : 'bg-gray-100 group-hover:bg-gray-200'
+                  }`}>
+                    <item.icon
+                      size={20}
+                      className={`${
+                        isActive ? 'text-white' : 'text-gray-600 group-hover:text-gray-700'
+                      }`}
+                    />
+                  </div>
+                  <div className="ml-4 flex-1">
+                    <p className={`font-interface font-bold text-sm ${
+                      isActive ? 'text-white' : ''
+                    }`}>
                       {item.name}
                     </p>
-                    <p className="font-body text-xs text-gray-500 mt-0.5">
+                    <p className={`font-body text-xs mt-1 ${
+                      isActive ? 'text-blue-100' : 'text-gray-500'
+                    }`}>
                       {item.description}
                     </p>
                   </div>
                   {isActive && (
-                    <ChevronRight size={16} className="text-blue-600" />
+                    <ChevronRight size={16} className="text-white" />
                   )}
                 </Link>
               );
@@ -124,13 +134,17 @@ export default function AdminLayout({
           </nav>
 
           {/* Footer do Sidebar */}
-          <div className="p-6 border-t border-gray-200 space-y-2">
-            <button className="w-full flex items-center p-3 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors">
-              <Settings size={20} className="text-gray-400" />
+          <div className="p-4 border-t border-gray-200 space-y-2">
+            <button className="w-full flex items-center p-3 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors group">
+              <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-gray-200 flex items-center justify-center">
+                <Settings size={18} className="text-gray-600" />
+              </div>
               <span className="ml-3 font-interface font-semibold text-sm">Configurações</span>
             </button>
-            <button className="w-full flex items-center p-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors">
-              <LogOut size={20} />
+            <button className="w-full flex items-center p-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors group">
+              <div className="w-8 h-8 rounded-lg bg-red-100 group-hover:bg-red-200 flex items-center justify-center">
+                <LogOut size={18} className="text-red-600" />
+              </div>
               <span className="ml-3 font-interface font-semibold text-sm">Sair</span>
             </button>
           </div>
@@ -140,18 +154,18 @@ export default function AdminLayout({
       {/* Conteúdo Principal */}
       <div className="flex-1 min-h-screen lg:min-h-0">
         {/* Header Mobile */}
-        <header className="bg-white shadow-sm border-b border-gray-200 lg:hidden sticky top-0 z-40">
+        <header className="bg-gradient-to-r from-blue-50 to-indigo-50 shadow-sm border-b border-gray-200 lg:hidden sticky top-0 z-40">
           <div className="flex items-center justify-between p-4">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-gray-600 hover:text-gray-800 p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all"
             >
               <Menu size={24} />
             </button>
-            <h1 className="font-title text-lg font-bold text-gray-900">
+            <h1 className="font-title text-xl font-bold text-gray-900">
               Admin Dashboard
             </h1>
-            <div className="w-6" /> {/* Spacer */}
+            <div className="w-10" /> {/* Spacer */}
           </div>
         </header>
 
