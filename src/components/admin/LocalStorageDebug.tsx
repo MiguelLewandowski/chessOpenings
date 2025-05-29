@@ -95,6 +95,29 @@ export default function LocalStorageDebug() {
     }
   };
 
+  // Função para analisar relações entre dados
+  const analyzeDataRelations = () => {
+    const relations = aberturas.map(abertura => {
+      const licoesRelacionadas = licoes.filter(licao => licao.aberturaId === abertura.id);
+      const exerciciosRelacionados = exercicios.filter(exercicio => 
+        licoesRelacionadas.some(licao => licao.id === exercicio.licaoId)
+      );
+      
+      return {
+        abertura: abertura.nome,
+        aberturaId: abertura.id,
+        licoes: licoesRelacionadas.length,
+        exercicios: exerciciosRelacionados.length,
+        licoesDetalhes: licoesRelacionadas.map(l => ({ id: l.id, titulo: l.titulo })),
+        exerciciosDetalhes: exerciciosRelacionados.map(e => ({ id: e.id, titulo: e.titulo }))
+      };
+    });
+    
+    return relations;
+  };
+
+  const dataRelations = analyzeDataRelations();
+
   const handleExportData = () => {
     const exported = exportData();
     if (exported) {
@@ -257,6 +280,97 @@ export default function LocalStorageDebug() {
           <div className="pt-2 border-t border-gray-100">
             <div className="text-xs text-gray-500">
               Última atualização: {new Date().toLocaleTimeString()}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Relações entre Dados */}
+      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+            <Database size={18} className="text-white" />
+          </div>
+          <h3 className="font-interface font-bold text-lg text-gray-900">
+            Relações entre Dados
+          </h3>
+        </div>
+        
+        <div className="space-y-4">
+          {dataRelations.length === 0 ? (
+            <p className="text-gray-500 text-center py-4">
+              Nenhuma abertura cadastrada
+            </p>
+          ) : (
+            dataRelations.map((relation, index) => (
+              <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-interface font-semibold text-gray-900">
+                    {relation.abertura}
+                  </h4>
+                  <div className="flex items-center gap-4 text-sm">
+                    <span className="flex items-center gap-1 text-blue-600">
+                      <CheckCircle size={16} />
+                      {relation.licoes} lições
+                    </span>
+                    <span className="flex items-center gap-1 text-green-600">
+                      <Zap size={16} />
+                      {relation.exercicios} exercícios
+                    </span>
+                  </div>
+                </div>
+                
+                {relation.licoes > 0 && (
+                  <div className="mt-3">
+                    <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">
+                      Lições vinculadas:
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {relation.licoesDetalhes.map(licao => (
+                        <span key={licao.id} className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                          {licao.titulo}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {relation.exercicios > 0 && (
+                  <div className="mt-3">
+                    <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">
+                      Exercícios vinculados:
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {relation.exerciciosDetalhes.map(exercicio => (
+                        <span key={exercicio.id} className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">
+                          {exercicio.titulo}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {relation.licoes === 0 && relation.exercicios === 0 && (
+                  <p className="text-gray-500 text-sm mt-2">
+                    ⚠️ Esta abertura não possui lições ou exercícios vinculados
+                  </p>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+        
+        <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="flex items-start gap-3">
+            <AlertCircle size={20} className="text-yellow-600 mt-0.5" />
+            <div>
+              <h4 className="font-interface font-semibold text-yellow-800 mb-1">
+                Sobre a Exclusão em Cascata
+              </h4>
+              <p className="text-yellow-700 text-sm">
+                Ao excluir uma abertura, todas as lições e exercícios relacionados 
+                serão automaticamente removidos. Esta operação não pode ser desfeita.
+              </p>
             </div>
           </div>
         </div>
