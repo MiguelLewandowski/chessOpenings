@@ -223,4 +223,134 @@ export const deleteAberturaWithCascade = async (aberturaId: string) => {
     console.error('Erro na exclusão em cascata:', error);
     throw new Error('Falha ao excluir abertura e dados relacionados');
   }
+};
+
+// Tipos para migração (dados antigos)
+interface LicaoLegacy {
+  id: string;
+  titulo: string;
+  descricao?: string;
+  tipo?: 'Visualização' | 'Interativo';
+  dificuldade?: string;
+  status?: string;
+  pontuacao?: number;
+  conteudo?: {
+    introducao?: string;
+    explicacao?: string;
+    movimentos?: Array<{
+      id?: string;
+      movimento?: string;
+      posicaoFEN?: string;
+      explicacao?: string;
+      destaque?: unknown;
+      tempo?: number;
+    }>;
+    dicas?: string[];
+    conclusao?: string;
+  };
+}
+
+// Função para migrar dados da reestruturação de lições/exercícios
+export const migrateLicoesVisualizacaoToExercicios = () => {
+  try {
+    // Carrega dados atuais
+    const licoes: LicaoLegacy[] = JSON.parse(localStorage.getItem('chess-openings-licoes') || '[]');
+    const exercicios = JSON.parse(localStorage.getItem('chess-openings-exercicios') || '[]');
+    
+    // Encontra lições do tipo "Visualização" que precisam ser migradas
+    const licoesVisualizacao = licoes.filter((licao: LicaoLegacy) => licao.tipo === 'Visualização');
+    
+    if (licoesVisualizacao.length === 0) {
+      console.log('Nenhuma lição de visualização encontrada para migrar');
+      return { migradas: 0, exerciciosCriados: 0 };
+    }
+    
+    const exerciciosCriados = [];
+    
+    // Converte cada lição de visualização em exercício passivo
+    for (const licao of licoesVisualizacao) {
+      const novoExercicio = {
+        id: Math.random().toString(36).substr(2, 9),
+        titulo: `${licao.titulo} - Sequência`,
+        descricao: licao.descricao || `Visualização da sequência: ${licao.titulo}`,
+        licaoId: licao.id,
+        ordem: 1, // Primeiro exercício da lição
+        tipo: 'Conceitual',
+        modo: 'Passivo',
+        dificuldade: licao.dificuldade || 'Iniciante',
+        status: licao.status || 'Ativo',
+        conteudo: {
+          posicaoInicial: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+          contexto: licao.conteudo?.introducao || '',
+          pergunta: '',
+          sequenciaMovimentos: licao.conteudo?.movimentos?.map((mov) => ({
+            id: mov.id || Math.random().toString(36).substr(2, 9),
+            movimento: mov.movimento || '',
+            posicaoFEN: mov.posicaoFEN || '',
+            explicacao: mov.explicacao || '',
+            destaque: mov.destaque,
+            tempo: mov.tempo
+          })) || [],
+          opcoes: [],
+          movimentoCorreto: [],
+          explicacao: licao.conteudo?.explicacao || '',
+          dicas: licao.conteudo?.dicas || [],
+          feedbackCorreto: 'Sequência concluída com sucesso!',
+          feedbackIncorreto: ''
+        },
+        pontuacao: licao.pontuacao || 100,
+        tempoLimite: undefined,
+        tentativasMaximas: 1,
+        criadoEm: new Date().toISOString().split('T')[0],
+        atualizadoEm: new Date().toISOString().split('T')[0]
+      };
+      
+      exerciciosCriados.push(novoExercicio);
+    }
+    
+    // Atualiza as lições removendo o tipo "Visualização" e simplificando o conteúdo
+    const licoesAtualizadas = licoes.map((licao: LicaoLegacy) => {
+      if (licao.tipo === 'Visualização') {
+        return {
+          ...licao,
+          // Remove o campo tipo (agora só conceituais)
+          tipo: undefined,
+          conteudo: {
+            introducao: licao.conteudo?.introducao || '',
+            explicacao: licao.conteudo?.explicacao || '',
+            conceitos: [], // Novo campo
+            dicas: licao.conteudo?.dicas || [],
+            conclusao: licao.conteudo?.conclusao || '',
+            recursosAdicionais: []
+          }
+        };
+      }
+      return licao;
+    });
+    
+    // Salva os dados atualizados
+    localStorage.setItem('chess-openings-licoes', JSON.stringify(licoesAtualizadas));
+    localStorage.setItem('chess-openings-exercicios', JSON.stringify([...exercicios, ...exerciciosCriados]));
+    
+    console.log(`Migração concluída: ${licoesVisualizacao.length} lições convertidas, ${exerciciosCriados.length} exercícios criados`);
+    
+    return {
+      migradas: licoesVisualizacao.length,
+      exerciciosCriados: exerciciosCriados.length
+    };
+    
+  } catch (error) {
+    console.error('Erro durante migração:', error);
+    return { migradas: 0, exerciciosCriados: 0, erro: error };
+  }
+};
+
+// Função para verificar se a migração já foi executada
+export const verificarMigracaoNecessaria = (): boolean => {
+  try {
+    const licoes: LicaoLegacy[] = JSON.parse(localStorage.getItem('chess-openings-licoes') || '[]');
+    return licoes.some((licao: LicaoLegacy) => licao.tipo === 'Visualização');
+  } catch {
+    return false;
+  }
 }; 
