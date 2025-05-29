@@ -141,12 +141,19 @@ export default function AberturaForm({
       newErrors.movimentos = 'Pelo menos um movimento é obrigatório';
     }
 
-    if (!isValidSequence) {
+    if (formData.movimentos.length > 0 && !isValidSequence) {
       newErrors.movimentos = 'Sequência de movimentos inválida';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  // Função para verificar se pode habilitar o botão
+  const canSubmit = () => {
+    const hasBasicInfo = formData.nome.trim().length > 0 && formData.descricao.trim().length > 0;
+    const hasValidMovements = formData.movimentos.length === 0 || isValidSequence;
+    return hasBasicInfo && hasValidMovements;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -219,7 +226,13 @@ export default function AberturaForm({
                   <input
                     type="text"
                     value={formData.nome}
-                    onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
+                    onChange={(e) => {
+                      setFormData(prev => ({ ...prev, nome: e.target.value }));
+                      // Limpar erro do nome quando usuário digita
+                      if (errors.nome && e.target.value.trim()) {
+                        setErrors(prev => ({ ...prev, nome: '' }));
+                      }
+                    }}
                     placeholder="Ex: Abertura Italiana, Defesa Siciliana..."
                     className={`w-full px-4 py-3 border rounded-lg font-body focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                       errors.nome ? 'border-red-300' : 'border-gray-200'
@@ -334,7 +347,13 @@ export default function AberturaForm({
                   </label>
                   <textarea
                     value={formData.descricao}
-                    onChange={(e) => setFormData(prev => ({ ...prev, descricao: e.target.value }))}
+                    onChange={(e) => {
+                      setFormData(prev => ({ ...prev, descricao: e.target.value }));
+                      // Limpar erro da descrição quando usuário digita
+                      if (errors.descricao && e.target.value.trim()) {
+                        setErrors(prev => ({ ...prev, descricao: '' }));
+                      }
+                    }}
                     placeholder="Descreva as características principais desta abertura..."
                     rows={4}
                     className={`w-full px-4 py-3 border rounded-lg font-body focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none ${
@@ -425,7 +444,7 @@ export default function AberturaForm({
               </button>
               <button
                 onClick={handleSubmit}
-                disabled={!isValidSequence || Object.keys(errors).length > 0}
+                disabled={!canSubmit()}
                 className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg font-interface font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
                 <Save size={18} />
