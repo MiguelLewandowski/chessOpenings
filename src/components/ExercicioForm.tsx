@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import { X, Save, AlertCircle, Plus, Trash2, Play, HelpCircle, Zap, Loader2, Eye, EyeOff } from 'lucide-react';
@@ -54,6 +54,23 @@ export default function ExercicioForm({
   const [showPreview, setShowPreview] = useState(true);
   const [fenError, setFenError] = useState<string>('');
 
+  const validateAndUpdateFEN = useCallback((fen: string) => {
+    if (!fen.trim()) {
+      chess.reset();
+      setBoardPosition(chess.fen());
+      setFenError('');
+      return;
+    }
+
+    try {
+      chess.load(fen);
+      setBoardPosition(fen);
+      setFenError('');
+    } catch {
+      setFenError('FEN inválido - verifique a notação');
+    }
+  }, [chess]);
+
   useEffect(() => {
     if (initialData) {
       setFormData(initialData);
@@ -89,7 +106,7 @@ export default function ExercicioForm({
       setFenError('');
     }
     setErrors({});
-  }, [initialData, isOpen]);
+  }, [initialData, isOpen, validateAndUpdateFEN, chess]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -250,24 +267,6 @@ export default function ExercicioForm({
         dicas: prev.conteudo.dicas.filter((_, i) => i !== index)
       }
     }));
-  };
-
-  // Função para validar e atualizar FEN
-  const validateAndUpdateFEN = (fen: string) => {
-    if (!fen.trim()) {
-      chess.reset();
-      setBoardPosition(chess.fen());
-      setFenError('');
-      return;
-    }
-
-    try {
-      chess.load(fen);
-      setBoardPosition(fen);
-      setFenError('');
-    } catch {
-      setFenError('FEN inválido - verifique a notação');
-    }
   };
 
   // Função para atualizar FEN no formulário
