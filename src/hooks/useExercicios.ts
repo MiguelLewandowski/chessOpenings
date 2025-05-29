@@ -192,10 +192,12 @@ export function useExercicios() {
     const ativos = exercicios.filter(e => e.status === 'Ativo').length;
     const rascunhos = exercicios.filter(e => e.status === 'Rascunho').length;
     const arquivados = exercicios.filter(e => e.status === 'Arquivado').length;
-    const tatico = exercicios.filter(e => e.tipo === 'Tático').length;
-    const estrategico = exercicios.filter(e => e.tipo === 'Estratégico').length;
-    const tecnico = exercicios.filter(e => e.tipo === 'Técnico').length;
-    const final = exercicios.filter(e => e.tipo === 'Final').length;
+    
+    // Por tipo
+    const passivos = exercicios.filter(e => e.tipo === 'Passivo').length;
+    const interativos = exercicios.filter(e => e.tipo === 'Interativo').length;
+    const quiz = exercicios.filter(e => e.tipo === 'Quiz').length;
+    
     const pontuacaoTotal = exercicios.reduce((total, e) => total + e.pontuacao, 0);
 
     return {
@@ -203,10 +205,9 @@ export function useExercicios() {
       ativos,
       rascunhos,
       arquivados,
-      tatico,
-      estrategico,
-      tecnico,
-      final,
+      passivos,
+      interativos,
+      quiz,
       pontuacaoTotal
     };
   }, [exercicios]);

@@ -171,17 +171,15 @@ export function useLicoes() {
   const filterLicoes = useCallback((
     searchTerm: string,
     aberturaId: string = 'all',
-    tipo: string = 'all',
     dificuldade: string = 'all'
   ): Licao[] => {
     return licoes.filter(licao => {
       const matchSearch = licao.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          licao.descricao.toLowerCase().includes(searchTerm.toLowerCase());
       const matchAbertura = aberturaId === 'all' || licao.aberturaId === aberturaId;
-      const matchTipo = tipo === 'all' || licao.tipo === tipo;
       const matchDificuldade = dificuldade === 'all' || licao.dificuldade === dificuldade;
       
-      return matchSearch && matchAbertura && matchTipo && matchDificuldade;
+      return matchSearch && matchAbertura && matchDificuldade;
     });
   }, [licoes]);
 
@@ -198,8 +196,6 @@ export function useLicoes() {
     const ativas = licoes.filter(l => l.status === 'Ativo').length;
     const rascunhos = licoes.filter(l => l.status === 'Rascunho').length;
     const arquivadas = licoes.filter(l => l.status === 'Arquivado').length;
-    const visualizacao = licoes.filter(l => l.tipo === 'Visualização').length;
-    const interativo = licoes.filter(l => l.tipo === 'Interativo').length;
     const tempoTotal = licoes.reduce((total, l) => total + l.estimativaTempo, 0);
 
     return {
@@ -207,8 +203,6 @@ export function useLicoes() {
       ativas,
       rascunhos,
       arquivadas,
-      visualizacao,
-      interativo,
       tempoTotal
     };
   }, [licoes]);
