@@ -6,11 +6,9 @@ import {
   Search,
   Edit,
   Trash2,
-  Eye,
   BookOpen,
   Target,
   Zap,
-  MoreVertical,
   Loader2,
   X,
   PlayCircle
@@ -88,11 +86,32 @@ export default function GerenciamentoAberturas() {
   };
 
   const handleDeleteAbertura = async (id: string) => {
-    if (window.confirm('Tem certeza que deseja excluir esta abertura?')) {
+    // Mostrar diálogo de confirmação mais informativo
+    const abertura = aberturasFiltradas.find(a => a.id === id);
+    if (!abertura) return;
+
+    const confirmMessage = `⚠️ ATENÇÃO: Exclusão em Cascata
+
+Tem certeza que deseja excluir a abertura "${abertura.nome}"?
+
+Esta ação irá remover permanentemente:
+• A abertura selecionada
+• Todas as lições relacionadas a esta abertura
+• Todos os exercícios das lições relacionadas
+
+Esta operação NÃO PODE ser desfeita.
+
+Confirmar exclusão?`;
+
+    if (window.confirm(confirmMessage)) {
       try {
         await deleteAbertura(id);
+        
+        // Feedback de sucesso (opcional - pode ser substituído por toast/notification)
+        alert('✅ Abertura e todos os dados relacionados foram excluídos com sucesso!');
       } catch (err) {
         console.error('Erro ao deletar abertura:', err);
+        alert('❌ Erro ao excluir abertura. Tente novamente.');
       }
     }
   };
@@ -127,36 +146,41 @@ export default function GerenciamentoAberturas() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
         <div>
-          <h1 className="font-title text-2xl sm:text-3xl font-bold text-gray-900">
-            Gerenciamento de Aberturas
-          </h1>
-          <p className="font-body text-gray-600 mt-2">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+              <BookOpen className="text-white" size={18} />
+            </div>
+            <h1 className="font-title text-3xl sm:text-4xl font-bold text-gray-900">
+              Gerenciamento de Aberturas
+            </h1>
+          </div>
+          <p className="font-body text-lg text-gray-600">
             Crie, edite e organize as aberturas de xadrez da plataforma
           </p>
         </div>
         <button 
           onClick={handleCreateAbertura}
           disabled={loading}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-interface font-semibold hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-interface font-bold hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
         >
-          {loading ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
+          {loading ? <Loader2 size={20} className="animate-spin" /> : <Plus size={20} />}
           Nova Abertura
         </button>
       </div>
 
       {/* Filtros e Busca */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
         <div className="flex flex-col lg:flex-row gap-4">
           {/* Busca */}
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="text"
                 placeholder="Buscar aberturas..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl font-body focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -166,7 +190,7 @@ export default function GerenciamentoAberturas() {
             <select
               value={filterCategoria}
               onChange={(e) => setFilterCategoria(e.target.value)}
-              className="px-4 py-3 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-3 border border-gray-200 rounded-xl font-body focus:ring-2 focus:ring-blue-500 bg-white"
             >
               <option value="all">Todas as categorias</option>
               <option value="Tática">Tática</option>
@@ -177,7 +201,7 @@ export default function GerenciamentoAberturas() {
             <select
               value={filterDificuldade}
               onChange={(e) => setFilterDificuldade(e.target.value)}
-              className="px-4 py-3 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-3 border border-gray-200 rounded-xl font-body focus:ring-2 focus:ring-blue-500 bg-white"
             >
               <option value="all">Todas as dificuldades</option>
               <option value="Iniciante">Iniciante</option>
@@ -189,81 +213,100 @@ export default function GerenciamentoAberturas() {
       </div>
 
       {/* Lista de Aberturas */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-100">
+            <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
               <tr>
-                <th className="text-left p-4 font-interface font-semibold text-gray-700">Abertura</th>
-                <th className="text-left p-4 font-interface font-semibold text-gray-700">Categoria</th>
-                <th className="text-left p-4 font-interface font-semibold text-gray-700">Dificuldade</th>
-                <th className="text-left p-4 font-interface font-semibold text-gray-700">Descrição</th>
-                <th className="text-left p-4 font-interface font-semibold text-gray-700">Status</th>
-                <th className="text-left p-4 font-interface font-semibold text-gray-700">Atualizado</th>
-                <th className="text-right p-4 font-interface font-semibold text-gray-700">Ações</th>
+                <th className="text-left p-6 font-interface font-bold text-gray-800">
+                  <div className="flex items-center gap-2">
+                    <BookOpen size={16} className="text-gray-600" />
+                    Abertura
+                  </div>
+                </th>
+                <th className="text-left p-6 font-interface font-bold text-gray-800">
+                  <div className="flex items-center gap-2">
+                    <Target size={16} className="text-gray-600" />
+                    Categoria
+                  </div>
+                </th>
+                <th className="text-left p-6 font-interface font-bold text-gray-800">
+                  <div className="flex items-center gap-2">
+                    <Zap size={16} className="text-gray-600" />
+                    Dificuldade
+                  </div>
+                </th>
+                <th className="text-left p-6 font-interface font-bold text-gray-800">Descrição</th>
+                <th className="text-left p-6 font-interface font-bold text-gray-800">Status</th>
+                <th className="text-left p-6 font-interface font-bold text-gray-800">Atualizado</th>
+                <th className="text-right p-6 font-interface font-bold text-gray-800">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {aberturasFiltradas.map((abertura) => (
                 <tr key={abertura.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="p-4">
+                  <td className="p-6">
                     <div>
-                      <h3 className="font-interface font-semibold text-gray-900">{abertura.nome}</h3>
-                      <p className="font-body text-sm text-gray-600 mt-1">
+                      <h3 className="font-interface font-bold text-lg text-gray-900 mb-2">{abertura.nome}</h3>
+                      <p className="font-mono text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-lg inline-block">
                         {abertura.movimentos.join(' ')}
                       </p>
                     </div>
                   </td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-2">
-                      {getCategoriaIcon(abertura.categoria)}
-                      <span className="font-body text-sm text-gray-700">{abertura.categoria}</span>
+                  <td className="p-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
+                        {getCategoriaIcon(abertura.categoria)}
+                      </div>
+                      <span className="font-body font-medium text-gray-700">{abertura.categoria}</span>
                     </div>
                   </td>
-                  <td className="p-4">
-                    <span className="font-body text-sm text-gray-700">{abertura.dificuldade}</span>
+                  <td className="p-6">
+                    <span className={`font-body font-semibold px-3 py-1 rounded-full text-sm ${
+                      abertura.dificuldade === 'Iniciante' ? 'bg-green-100 text-green-700' :
+                      abertura.dificuldade === 'Intermediário' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                      {abertura.dificuldade}
+                    </span>
                   </td>
-                  <td className="p-4">
-                    <p className="font-body text-sm text-gray-600">
+                  <td className="p-6 max-w-md">
+                    <p className="font-body text-gray-600 leading-relaxed">
                       {abertura.descricao}
                     </p>
                   </td>
-                  <td className="p-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-interface font-semibold ${getStatusColor(abertura.status)}`}>
+                  <td className="p-6">
+                    <span className={`px-4 py-2 rounded-full text-sm font-interface font-bold ${getStatusColor(abertura.status)}`}>
                       {abertura.status}
                     </span>
                   </td>
-                  <td className="p-4">
+                  <td className="p-6">
                     <span className="font-body text-sm text-gray-600">
                       {new Date(abertura.atualizadoEm).toLocaleDateString('pt-BR')}
                     </span>
                   </td>
-                  <td className="p-4">
+                  <td className="p-6">
                     <div className="flex items-center justify-end gap-2">
-                      <button 
+                      <button
                         onClick={() => handleViewLicoes(abertura)}
-                        className="p-2 text-gray-400 hover:text-purple-600 rounded-lg hover:bg-purple-50 transition-colors"
-                        title="Ver Lições"
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Ver lições"
                       >
-                        <PlayCircle size={16} />
+                        <PlayCircle size={20} />
                       </button>
-                      <button className="p-2 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
-                        <Eye size={16} />
-                      </button>
-                      <button 
+                      <button
                         onClick={() => handleEditAbertura(abertura)}
-                        className="p-2 text-gray-400 hover:text-green-600 rounded-lg hover:bg-green-50 transition-colors"
+                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                        title="Editar"
                       >
-                        <Edit size={16} />
+                        <Edit size={20} />
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDeleteAbertura(abertura.id)}
-                        className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Excluir"
                       >
-                        <Trash2 size={16} />
-                      </button>
-                      <button className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors">
-                        <MoreVertical size={16} />
+                        <Trash2 size={20} />
                       </button>
                     </div>
                   </td>
@@ -273,18 +316,22 @@ export default function GerenciamentoAberturas() {
           </table>
         </div>
 
-        {/* Estado vazio */}
         {aberturasFiltradas.length === 0 && (
-          <div className="text-center py-12">
-            <BookOpen className="mx-auto text-gray-400 mb-4" size={48} />
-            <h3 className="font-interface font-semibold text-gray-700 mb-2">
+          <div className="text-center py-16 bg-gray-50">
+            <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+              <BookOpen className="text-gray-400" size={40} />
+            </div>
+            <h3 className="font-interface font-bold text-xl text-gray-700 mb-3">
               Nenhuma abertura encontrada
             </h3>
-            <p className="font-body text-gray-500 mb-6">
+            <p className="font-body text-gray-500 mb-8 text-lg">
               Tente ajustar os filtros ou criar uma nova abertura
             </p>
-            <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-interface font-semibold hover:bg-blue-700 transition-colors mx-auto">
-              <Plus size={18} />
+            <button 
+              onClick={handleCreateAbertura}
+              className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-interface font-bold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 mx-auto"
+            >
+              <Plus size={20} />
               Nova Abertura
             </button>
           </div>
@@ -292,50 +339,58 @@ export default function GerenciamentoAberturas() {
       </div>
 
       {/* Estatísticas Rápidas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl border border-gray-100 transition-all duration-300 hover:transform hover:scale-105">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-body text-sm text-gray-600">Total</p>
-              <p className="font-title text-2xl font-bold text-gray-900">{stats.total}</p>
+              <p className="font-body text-sm font-medium text-gray-600 uppercase tracking-wide">Total</p>
+              <p className="font-title text-3xl font-bold text-gray-900 mt-2">{stats.total}</p>
             </div>
-            <BookOpen className="text-blue-500" size={24} />
+            <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <BookOpen className="text-white" size={24} />
+            </div>
           </div>
         </div>
         
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl border border-gray-100 transition-all duration-300 hover:transform hover:scale-105">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-body text-sm text-gray-600">Ativas</p>
-              <p className="font-title text-2xl font-bold text-green-600">
+              <p className="font-body text-sm font-medium text-gray-600 uppercase tracking-wide">Ativas</p>
+              <p className="font-title text-3xl font-bold text-green-600 mt-2">
                 {stats.ativas}
               </p>
             </div>
-            <Target className="text-green-500" size={24} />
+            <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <Target className="text-white" size={24} />
+            </div>
           </div>
         </div>
         
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl border border-gray-100 transition-all duration-300 hover:transform hover:scale-105">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-body text-sm text-gray-600">Rascunhos</p>
-              <p className="font-title text-2xl font-bold text-yellow-600">
+              <p className="font-body text-sm font-medium text-gray-600 uppercase tracking-wide">Rascunhos</p>
+              <p className="font-title text-3xl font-bold text-yellow-600 mt-2">
                 {stats.rascunhos}
               </p>
             </div>
-            <Edit className="text-yellow-500" size={24} />
+            <div className="w-14 h-14 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <Edit className="text-white" size={24} />
+            </div>
           </div>
         </div>
         
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl border border-gray-100 transition-all duration-300 hover:transform hover:scale-105">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-body text-sm text-gray-600">Arquivadas</p>
-              <p className="font-title text-2xl font-bold text-gray-600">
+              <p className="font-body text-sm font-medium text-gray-600 uppercase tracking-wide">Arquivadas</p>
+              <p className="font-title text-3xl font-bold text-gray-600 mt-2">
                 {stats.arquivadas}
               </p>
             </div>
-            <Zap className="text-gray-500" size={24} />
+            <div className="w-14 h-14 bg-gradient-to-br from-gray-500 to-gray-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <Zap className="text-white" size={24} />
+            </div>
           </div>
         </div>
       </div>
