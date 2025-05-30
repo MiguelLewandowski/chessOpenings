@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   BookOpen,
@@ -46,14 +46,18 @@ const LicaoNode = ({
   position, 
   isUnlocked, 
   isCompleted, 
-  isCurrent 
+  isCurrent,
+  aberturaId 
 }: {
   licao: Licao;
   position: { x: number; y: number };
   isUnlocked: boolean;
   isCompleted: boolean;
   isCurrent: boolean;
+  aberturaId: string;
 }) => {
+  const router = useRouter();
+  
   const getNodeStyle = () => {
     if (isCompleted) {
       return 'bg-green-500 border-green-600 text-white shadow-lg shadow-green-500/25';
@@ -74,6 +78,12 @@ const LicaoNode = ({
     return <BookOpen size={20} />;
   };
 
+  const handleClick = () => {
+    if (isUnlocked) {
+      router.push(`/aberturas/${aberturaId}/licao/${licao.id}`);
+    }
+  };
+
   return (
     <div
       className="absolute"
@@ -92,12 +102,15 @@ const LicaoNode = ({
       )}
       
       {/* Nó da lição */}
-      <div className={`
-        relative w-16 h-16 rounded-xl border-3 transition-all duration-300
-        flex items-center justify-center font-bold text-sm
-        ${getNodeStyle()}
-        ${isUnlocked ? 'hover:scale-110 cursor-pointer' : 'cursor-not-allowed'}
-      `}>
+      <div 
+        onClick={handleClick}
+        className={`
+          relative w-16 h-16 rounded-xl border-3 transition-all duration-300
+          flex items-center justify-center font-bold text-sm
+          ${getNodeStyle()}
+          ${isUnlocked ? 'hover:scale-110 cursor-pointer' : 'cursor-not-allowed'}
+        `}
+      >
         {/* Ícone principal */}
         {getIcon()}
         
@@ -184,6 +197,8 @@ export default function TrilhaLicoes() {
       return total + (licao?.estimativaTempo || 0);
     }, 0);
   };
+
+  const router = useRouter();
 
   if (!abertura) {
     return <div>Abertura não encontrada</div>;
@@ -322,6 +337,7 @@ export default function TrilhaLicoes() {
               isUnlocked={licao.ordem <= currentLicao}
               isCompleted={completedLicoes.includes(licao.ordem)}
               isCurrent={licao.ordem === currentLicao}
+              aberturaId={aberturaId}
             />
           ))}
           
@@ -367,7 +383,10 @@ export default function TrilhaLicoes() {
                   </p>
                   
                   <div className="flex gap-3">
-                    <button className="flex-1 bg-blue-600 text-white px-4 py-3 rounded-xl font-interface font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 min-w-0 cursor-pointer">
+                    <button 
+                      onClick={() => router.push(`/aberturas/${aberturaId}/licao/${licao.id}`)}
+                      className="flex-1 bg-blue-600 text-white px-4 py-3 rounded-xl font-interface font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 min-w-0 cursor-pointer"
+                    >
                       <Play size={16} className="flex-shrink-0" />
                       <span className="truncate">Iniciar Lição</span>
                     </button>
