@@ -30,6 +30,17 @@ export default function LicaoPage() {
     .filter(e => e.licaoId === licaoId && e.status === 'Ativo')
     .sort((a, b) => a.ordem - b.ordem);
 
+  // Buscar todas as lições desta abertura para navegação
+  const licoesAbertura = licoes
+    .filter(l => l.aberturaId === aberturaId && l.status === 'Ativo')
+    .sort((a, b) => a.ordem - b.ordem);
+
+  // Identificar próxima lição
+  const licaoAtualIndex = licoesAbertura.findIndex(l => l.id === licaoId);
+  const proximaLicao = licaoAtualIndex < licoesAbertura.length - 1 
+    ? licoesAbertura[licaoAtualIndex + 1] 
+    : null;
+
   // Hook de progresso
   const progressHook = useLicaoProgress(exerciciosLicao);
   
@@ -69,6 +80,12 @@ export default function LicaoPage() {
 
   const handleBackToTrilha = () => {
     router.push(`/aberturas/${aberturaId}/trilha`);
+  };
+
+  const handleProximaLicao = () => {
+    if (proximaLicao) {
+      router.push(`/aberturas/${aberturaId}/licao/${proximaLicao.id}`);
+    }
   };
 
   if (!abertura || !licao || !currentExercicio) {
@@ -230,29 +247,74 @@ export default function LicaoPage() {
               Parabéns! 🎉
             </h2>
             
-            <p className="text-gray-600 mb-6">
-              Você completou a lição &quot;{licao.titulo}&quot; com sucesso!
-            </p>
+            {proximaLicao ? (
+              // Há mais lições
+              <>
+                <p className="text-gray-600 mb-6">
+                  Você completou a lição &quot;{licao.titulo}&quot; com sucesso!
+                </p>
 
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <div className="font-bold text-gray-900">{totalScore}</div>
-                  <div className="text-gray-600">Pontos</div>
+                <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <div className="font-bold text-gray-900">{totalScore}</div>
+                      <div className="text-gray-600">Pontos</div>
+                    </div>
+                    <div>
+                      <div className="font-bold text-gray-900">{Math.floor(totalTime / 60)}m {totalTime % 60}s</div>
+                      <div className="text-gray-600">Tempo</div>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <div className="font-bold text-gray-900">{Math.floor(totalTime / 60)}m {totalTime % 60}s</div>
-                  <div className="text-gray-600">Tempo</div>
-                </div>
-              </div>
-            </div>
 
-            <button
-              onClick={handleBackToTrilha}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
-            >
-              Voltar às Lições
-            </button>
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={handleProximaLicao}
+                    className="w-full bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                  >
+                    Próxima Lição
+                  </button>
+                  
+                  <button
+                    onClick={handleBackToTrilha}
+                    className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold transition-colors"
+                  >
+                    Voltar para a Trilha
+                  </button>
+                </div>
+              </>
+            ) : (
+              // Não há mais lições - completou toda a abertura
+              <>
+                <p className="text-gray-600 mb-6">
+                  Você finalizou todas as lições da abertura <strong>{abertura.nome}</strong>!
+                </p>
+
+                <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-4 mb-6 border border-yellow-200">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Trophy className="text-yellow-600" size={20} />
+                    <span className="font-bold text-yellow-800">Abertura Dominada!</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <div className="font-bold text-gray-900">{totalScore}</div>
+                      <div className="text-gray-600">Pontos Finais</div>
+                    </div>
+                    <div>
+                      <div className="font-bold text-gray-900">{Math.floor(totalTime / 60)}m {totalTime % 60}s</div>
+                      <div className="text-gray-600">Tempo Total</div>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleBackToTrilha}
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                >
+                  Voltar para a Trilha
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
