@@ -321,7 +321,7 @@ export default function ExercicioForm({
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 rounded-full"
+            className="p-2 text-gray-400 hover:text-gray-600 rounded-full cursor-pointer"
             disabled={loading}
           >
             <X className="w-5 h-5" />
@@ -343,9 +343,7 @@ export default function ExercicioForm({
                 <select
                   value={formData.licaoId}
                   onChange={(e) => setFormData({ ...formData, licaoId: e.target.value })}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.licaoId ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 cursor-pointer"
                   disabled={loading}
                 >
                   <option value="">Selecione uma lição</option>
@@ -376,7 +374,7 @@ export default function ExercicioForm({
                 <select
                   value={formData.tipo}
                   onChange={(e) => setFormData({ ...formData, tipo: e.target.value as 'Passivo' | 'Interativo' | 'Quiz' })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 cursor-pointer"
                   disabled={loading}
                 >
                   <option value="Passivo">Passivo (Demonstração)</option>
@@ -398,7 +396,7 @@ export default function ExercicioForm({
                 <select
                   value={formData.dificuldade}
                   onChange={(e) => setFormData({ ...formData, dificuldade: e.target.value as 'Iniciante' | 'Intermediário' | 'Avançado' })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 cursor-pointer"
                   disabled={loading}
                 >
                   <option value="Iniciante">Iniciante</option>
@@ -415,7 +413,7 @@ export default function ExercicioForm({
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value as 'Ativo' | 'Rascunho' | 'Arquivado' })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 cursor-pointer"
                   disabled={loading}
                 >
                   <option value="Ativo">Ativo</option>
@@ -518,7 +516,7 @@ export default function ExercicioForm({
                 <button
                   type="button"
                   onClick={() => setShowPreview(!showPreview)}
-                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm"
+                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm cursor-pointer"
                 >
                   {showPreview ? (
                     <>
@@ -622,7 +620,7 @@ export default function ExercicioForm({
                   <button
                     type="button"
                     onClick={addMovimento}
-                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors cursor-pointer"
                     disabled={loading}
                   >
                     <Plus size={16} />
@@ -640,7 +638,7 @@ export default function ExercicioForm({
                         <button
                           type="button"
                           onClick={() => removeMovimento(index)}
-                          className="text-red-400 hover:text-red-600"
+                          className="text-red-400 hover:text-red-600 cursor-pointer"
                           disabled={loading}
                         >
                           <Trash2 size={18} />
@@ -761,7 +759,7 @@ export default function ExercicioForm({
                   <button
                     type="button"
                     onClick={addOpcao}
-                    className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700 transition-colors"
+                    className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700 transition-colors cursor-pointer"
                     disabled={loading}
                   >
                     <Plus size={16} />
@@ -790,7 +788,7 @@ export default function ExercicioForm({
                           <button
                             type="button"
                             onClick={() => removeOpcao(index)}
-                            className="text-red-400 hover:text-red-600"
+                            className="text-red-400 hover:text-red-600 cursor-pointer"
                             disabled={loading}
                           >
                             <Trash2 size={18} />
@@ -875,7 +873,7 @@ export default function ExercicioForm({
                 <button
                   type="button"
                   onClick={addDica}
-                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm"
+                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm cursor-pointer"
                   disabled={loading}
                 >
                   <Plus size={16} />
@@ -898,7 +896,7 @@ export default function ExercicioForm({
                     <button
                       type="button"
                       onClick={() => removeDica(index)}
-                      className="text-red-400 hover:text-red-600"
+                      className="text-red-400 hover:text-red-600 cursor-pointer"
                       disabled={loading}
                     >
                       <Trash2 size={18} />
@@ -1025,15 +1023,15 @@ export default function ExercicioForm({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+              className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md cursor-pointer"
               disabled={loading}
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md flex items-center disabled:opacity-50"
               disabled={loading}
+              className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md flex items-center disabled:opacity-50 cursor-pointer"
             >
               {loading ? (
                 <>

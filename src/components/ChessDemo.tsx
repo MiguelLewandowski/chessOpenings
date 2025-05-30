@@ -5,27 +5,27 @@ import { Chessboard } from 'react-chessboard';
 import { Chess } from 'chess.js';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 
+// Sequência da abertura Italiana - movida para fora do componente
+const openingMoves = [
+  'e4', 'e5', 'Nf3', 'Nc6', 'Bc4', 'Bc5', 'O-O', 'Nf6'
+];
+
+const moveDescriptions = [
+  "1. e4 - Controle central com peão do rei",
+  "1...e5 - Resposta simétrica do preto", 
+  "2. Nf3 - Desenvolvimento do cavalo atacando e5",
+  "2...Nc6 - Desenvolvimento e defesa do peão e5",
+  "3. Bc4 - Bispo italiano, mirando f7",
+  "3...Bc5 - Desenvolvimento simétrico do bispo",
+  "4. O-O - Roque para segurança do rei",
+  "4...Nf6 - Desenvolvimento e contra-ataque"
+];
+
 export default function ChessDemo() {
   const [game, setGame] = useState(new Chess());
   const [position, setPosition] = useState(game.fen());
   const [isPlaying, setIsPlaying] = useState(false);
   const [moveIndex, setMoveIndex] = useState(0);
-
-  // Sequência da abertura Italiana
-  const openingMoves = [
-    'e4', 'e5', 'Nf3', 'Nc6', 'Bc4', 'Bc5', 'O-O', 'Nf6'
-  ];
-
-  const moveDescriptions = [
-    "1. e4 - Controle central com peão do rei",
-    "1...e5 - Resposta simétrica do preto", 
-    "2. Nf3 - Desenvolvimento do cavalo atacando e5",
-    "2...Nc6 - Desenvolvimento e defesa do peão e5",
-    "3. Bc4 - Bispo italiano, mirando f7",
-    "3...Bc5 - Desenvolvimento simétrico do bispo",
-    "4. O-O - Roque para segurança do rei",
-    "4...Nf6 - Desenvolvimento e contra-ataque"
-  ];
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -101,7 +101,7 @@ export default function ChessDemo() {
           <div className="flex justify-center gap-3">
             <button
               onClick={togglePlay}
-              className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-interface font-semibold hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-interface font-semibold hover:bg-blue-700 transition-colors cursor-pointer"
             >
               {isPlaying ? (
                 <>
@@ -118,7 +118,7 @@ export default function ChessDemo() {
             
             <button
               onClick={resetDemo}
-              className="flex items-center gap-2 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-interface font-semibold hover:bg-gray-300 transition-colors"
+              className="flex items-center gap-2 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-interface font-semibold hover:bg-gray-300 transition-colors cursor-pointer"
             >
               <RotateCcw size={18} />
               Reset

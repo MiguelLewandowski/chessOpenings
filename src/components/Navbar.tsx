@@ -63,13 +63,13 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-4">
             <Link
               href="/login"
-              className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-lg text-sm font-interface font-semibold transition-colors"
+              className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-lg text-sm font-interface font-semibold transition-colors cursor-pointer"
             >
               Entrar
             </Link>
             <Link
               href="/admin"
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-interface font-semibold hover:bg-blue-700 transition-colors"
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-interface font-semibold hover:bg-blue-700 transition-colors cursor-pointer"
             >
               Admin
             </Link>
@@ -78,7 +78,7 @@ export default function Navbar() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            className="md:hidden p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -97,7 +97,7 @@ export default function Navbar() {
                     isActive(item.href)
                       ? 'text-blue-600 bg-blue-50'
                       : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                  }`}
+                  } cursor-pointer`}
                 >
                   <item.icon size={20} />
                   {item.name}
@@ -108,7 +108,7 @@ export default function Navbar() {
                 <Link
                   href="/login"
                   onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-base font-interface font-semibold text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-3 px-3 py-3 rounded-lg text-base font-interface font-semibold text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   <User size={20} />
                   Entrar
@@ -116,7 +116,7 @@ export default function Navbar() {
                 <Link
                   href="/admin"
                   onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 bg-blue-600 text-white px-3 py-3 rounded-lg text-base font-interface font-semibold hover:bg-blue-700 transition-colors"
+                  className="flex items-center gap-3 bg-blue-600 text-white px-3 py-3 rounded-lg text-base font-interface font-semibold hover:bg-blue-700 transition-colors cursor-pointer"
                 >
                   <Target size={20} />
                   Admin

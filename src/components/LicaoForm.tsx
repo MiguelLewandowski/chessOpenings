@@ -103,7 +103,7 @@ export default function LicaoForm({
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
             disabled={loading}
           >
             <X size={24} />
@@ -122,7 +122,7 @@ export default function LicaoForm({
               onChange={(e) => setFormData({ ...formData, aberturaId: e.target.value })}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.aberturaId ? 'border-red-500' : 'border-gray-300'
-              }`}
+              } cursor-pointer`}
               disabled={loading}
             >
               <option value="">Selecione uma abertura</option>
@@ -196,14 +196,14 @@ export default function LicaoForm({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors cursor-pointer"
               disabled={loading}
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md flex items-center transition-colors disabled:opacity-50"
+              className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md flex items-center transition-colors disabled:opacity-50 cursor-pointer"
               disabled={loading}
             >
               {loading ? (
