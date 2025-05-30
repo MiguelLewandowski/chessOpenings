@@ -425,7 +425,7 @@ export default function LocalStorageDebug() {
             </div>
             <button
               onClick={executarMigracao}
-              className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium"
+              className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium cursor-pointer"
             >
               Executar Migração
             </button>
@@ -437,7 +437,7 @@ export default function LocalStorageDebug() {
       <div className="flex flex-wrap gap-3">
         <button
           onClick={updateStats}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
         >
           <RefreshCw size={16} />
           Atualizar
@@ -445,7 +445,7 @@ export default function LocalStorageDebug() {
 
         <button
           onClick={handlePopularExemplos}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-700 bg-purple-100 rounded-lg hover:bg-purple-200 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-700 bg-purple-100 rounded-lg hover:bg-purple-200 transition-colors cursor-pointer"
         >
           <Zap size={16} />
           Popular Exemplos
@@ -453,7 +453,7 @@ export default function LocalStorageDebug() {
 
         <button
           onClick={handleExportData}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200 transition-colors cursor-pointer"
         >
           <Download size={16} />
           Exportar
@@ -472,7 +472,7 @@ export default function LocalStorageDebug() {
 
         <button
           onClick={handleClearData}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-700 bg-red-100 rounded-lg hover:bg-red-200 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-700 bg-red-100 rounded-lg hover:bg-red-200 transition-colors cursor-pointer"
         >
           <Trash2 size={16} />
           Limpar Tudo

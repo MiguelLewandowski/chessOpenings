@@ -92,7 +92,7 @@ export default function AberturaLicoesModal({
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
           >
             <X size={24} />
           </button>
@@ -231,24 +231,24 @@ export default function AberturaLicoesModal({
                         <div className="flex items-center gap-2 ml-4">
                           <button
                             onClick={() => handleViewLicao(licao.id)}
-                            className="p-2 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+                            className="p-2 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer"
                             title="Visualizar lição"
                           >
                             <BookOpen size={16} />
                           </button>
                           <button
                             onClick={() => handleEditLicao(licao.id)}
-                            className="p-2 text-gray-400 hover:text-green-600 rounded-lg hover:bg-green-50 transition-colors"
+                            className="p-2 text-gray-400 hover:text-green-600 rounded-lg hover:bg-green-50 transition-colors cursor-pointer"
                             title="Editar lição"
                           >
                             <Edit size={16} />
                           </button>
-                          <button className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors">
+                          <button className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer">
                             <Trash2 size={16} />
                           </button>
                           <button
                             onClick={() => handleViewLicao(licao.id)}
-                            className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+                            className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                           >
                             <ChevronRight size={16} />
                           </button>
@@ -272,7 +272,7 @@ export default function AberturaLicoesModal({
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 font-interface font-semibold hover:text-gray-900 transition-colors"
+              className="px-4 py-2 text-gray-700 font-interface font-semibold hover:text-gray-900 transition-colors cursor-pointer"
             >
               Fechar
             </button>
