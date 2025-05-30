@@ -161,7 +161,7 @@ Confirmar exclusão?`;
         <button 
           onClick={handleCreateAbertura}
           disabled={loading}
-          className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-interface font-bold hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+          className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-interface font-bold hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 cursor-pointer"
         >
           {loading ? <Loader2 size={20} className="animate-spin" /> : <Plus size={20} />}
           Nova Abertura
@@ -190,7 +190,7 @@ Confirmar exclusão?`;
             <select
               value={filterCategoria}
               onChange={(e) => setFilterCategoria(e.target.value)}
-              className="px-4 py-3 border border-gray-200 rounded-xl font-body focus:ring-2 focus:ring-blue-500 bg-white"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
             >
               <option value="all">Todas as categorias</option>
               <option value="Tática">Tática</option>
@@ -201,7 +201,7 @@ Confirmar exclusão?`;
             <select
               value={filterDificuldade}
               onChange={(e) => setFilterDificuldade(e.target.value)}
-              className="px-4 py-3 border border-gray-200 rounded-xl font-body focus:ring-2 focus:ring-blue-500 bg-white"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
             >
               <option value="all">Todas as dificuldades</option>
               <option value="Iniciante">Iniciante</option>
@@ -244,7 +244,7 @@ Confirmar exclusão?`;
             </thead>
             <tbody className="divide-y divide-gray-100">
               {aberturasFiltradas.map((abertura) => (
-                <tr key={abertura.id} className="hover:bg-gray-50 transition-colors">
+                <tr key={abertura.id} className="hover:bg-gray-50 transition-colors cursor-pointer">
                   <td className="p-6">
                     <div>
                       <h3 className="font-interface font-bold text-lg text-gray-900 mb-2">{abertura.nome}</h3>
@@ -289,21 +289,21 @@ Confirmar exclusão?`;
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => handleViewLicoes(abertura)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
                         title="Ver lições"
                       >
                         <PlayCircle size={20} />
                       </button>
                       <button
                         onClick={() => handleEditAbertura(abertura)}
-                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors cursor-pointer"
                         title="Editar"
                       >
                         <Edit size={20} />
                       </button>
                       <button
                         onClick={() => handleDeleteAbertura(abertura.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                         title="Excluir"
                       >
                         <Trash2 size={20} />
@@ -329,7 +329,7 @@ Confirmar exclusão?`;
             </p>
             <button 
               onClick={handleCreateAbertura}
-              className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-interface font-bold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 mx-auto"
+              className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-interface font-bold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 mx-auto cursor-pointer"
             >
               <Plus size={20} />
               Nova Abertura

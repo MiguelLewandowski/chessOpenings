@@ -145,7 +145,7 @@ export default function AdminDashboard() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-interface font-bold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base">
+          <button className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-interface font-bold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base cursor-pointer">
             <Plus size={20} />
             Novo Conteúdo
           </button>
@@ -155,7 +155,7 @@ export default function AdminDashboard() {
       {/* Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
-          <div key={index} className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl border border-gray-100 transition-all duration-300 hover:transform hover:scale-105">
+          <div key={index} className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl border border-gray-100 transition-all duration-300 hover:transform hover:scale-105 cursor-pointer">
             <div className="flex items-center justify-between mb-4">
               <div className="flex-1">
                 <p className="font-body text-sm font-medium text-gray-600 uppercase tracking-wide">
@@ -195,7 +195,7 @@ export default function AdminDashboard() {
           {quickActions.map((action, index) => (
             <button
               key={index}
-              className="p-6 border-2 border-gray-100 rounded-2xl hover:border-gray-200 hover:shadow-lg transition-all duration-300 text-left group hover:transform hover:scale-105"
+              className="p-6 border-2 border-gray-100 rounded-2xl hover:border-gray-200 hover:shadow-lg transition-all duration-300 text-left group hover:transform hover:scale-105 cursor-pointer"
             >
               <div className="flex items-center gap-4 mb-4">
                 <div className={`w-14 h-14 rounded-xl flex items-center justify-center shadow-md border ${colorVariants[action.color]}`}>
@@ -229,13 +229,13 @@ export default function AdminDashboard() {
                 Atividade Recente
               </h2>
             </div>
-            <button className="font-interface text-sm text-blue-600 hover:text-blue-700 font-semibold bg-blue-50 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors">
+            <button className="font-interface text-sm text-blue-600 hover:text-blue-700 font-semibold bg-blue-50 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer">
               Ver todas
             </button>
           </div>
           <div className="space-y-4">
             {recentActivity.map((activity, index) => (
-              <div key={index} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+              <div key={index} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer">
                 <div className="flex-shrink-0">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${colorVariants[activity.color]}`}>
                     <activity.icon size={18} />

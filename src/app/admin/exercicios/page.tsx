@@ -188,9 +188,9 @@ export default function GerenciamentoExercicios() {
         <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-body text-sm text-gray-600">Táticos</p>
+              <p className="font-body text-sm text-gray-600">Passivos</p>
               <p className="font-title text-2xl font-bold text-yellow-600">
-                {stats.tatico}
+                {stats.passivos}
               </p>
             </div>
             <Zap className="text-yellow-500" size={24} />
@@ -200,9 +200,9 @@ export default function GerenciamentoExercicios() {
         <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-body text-sm text-gray-600">Estratégicos</p>
+              <p className="font-body text-sm text-gray-600">Interativos</p>
               <p className="font-title text-2xl font-bold text-blue-600">
-                {stats.estrategico}
+                {stats.interativos}
               </p>
             </div>
             <Brain className="text-blue-500" size={24} />
@@ -212,9 +212,9 @@ export default function GerenciamentoExercicios() {
         <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-body text-sm text-gray-600">Finais</p>
+              <p className="font-body text-sm text-gray-600">Quiz</p>
               <p className="font-title text-2xl font-bold text-purple-600">
-                {stats.final}
+                {stats.quiz}
               </p>
             </div>
             <Crown className="text-purple-500" size={24} />
@@ -364,22 +364,22 @@ export default function GerenciamentoExercicios() {
                   </td>
                   <td className="p-4">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
+                      <button className="p-2 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer">
                         <Eye size={16} />
                       </button>
                       <button 
                         onClick={() => handleEditExercicio(exercicio)}
-                        className="p-2 text-gray-400 hover:text-green-600 rounded-lg hover:bg-green-50 transition-colors"
+                        className="p-2 text-gray-400 hover:text-green-600 rounded-lg hover:bg-green-50 transition-colors cursor-pointer"
                       >
                         <Edit size={16} />
                       </button>
                       <button 
                         onClick={() => handleDeleteExercicio(exercicio.id)}
-                        className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                        className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
                       >
                         <Trash2 size={16} />
                       </button>
-                      <button className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors">
+                      <button className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
                         <MoreVertical size={16} />
                       </button>
                     </div>
