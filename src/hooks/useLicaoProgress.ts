@@ -72,14 +72,27 @@ export const useLicaoProgress = (exercicios: Exercicio[]) => {
       const newTotalScore = newProgress.reduce((sum, p) => sum + p.score, 0);
       const newTotalTime = newProgress.reduce((sum, p) => sum + p.timeSpent, 0);
       
+      // Verificar se é o último exercício e se foi completado
+      const isLastExercicio = currentIndex === exercicios.length - 1;
+      const isLicaoCompleted = isLastExercicio && newProgress[currentIndex]?.completed;
+      
+      console.log('Debug conclusão lição:', {
+        currentIndex,
+        exerciciosLength: exercicios.length,
+        isLastExercicio,
+        exercicioCompleted: newProgress[currentIndex]?.completed,
+        isLicaoCompleted
+      });
+      
       return {
         ...prev,
         exerciciosProgress: newProgress,
         totalScore: newTotalScore,
-        totalTime: newTotalTime
+        totalTime: newTotalTime,
+        isCompleted: isLicaoCompleted || prev.isCompleted
       };
     });
-  }, []);
+  }, [exercicios.length]);
 
   // Memoizar o comprimento dos exercícios para evitar dependência instável
   const exerciciosLength = useMemo(() => exercicios.length, [exercicios.length]);
