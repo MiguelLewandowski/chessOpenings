@@ -143,7 +143,7 @@ export default function GaleriaAberturas() {
                 <select
                   value={filterCategoria}
                   onChange={(e) => setFilterCategoria(e.target.value)}
-                  className="px-4 py-3 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500"
+                  className="bg-white border border-gray-300 rounded-lg px-4 py-2 font-interface text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
                 >
                   <option value="all">Todas as categorias</option>
                   <option value="Tática">Tática</option>
@@ -155,7 +155,7 @@ export default function GaleriaAberturas() {
               <select
                 value={filterDificuldade}
                 onChange={(e) => setFilterDificuldade(e.target.value)}
-                className="px-4 py-3 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500"
+                className="bg-white border border-gray-300 rounded-lg px-4 py-2 font-interface text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
               >
                 <option value="all">Todas as dificuldades</option>
                 <option value="Iniciante">Iniciante</option>
@@ -188,7 +188,7 @@ export default function GaleriaAberturas() {
           {aberturasOrdenadas.map((abertura) => (
             <div
               key={abertura.id}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-blue-200 transition-all duration-300 group"
+              className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden group transform hover:scale-105 cursor-pointer"
             >
               {/* Preview do tabuleiro */}
               <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
@@ -275,12 +275,12 @@ export default function GaleriaAberturas() {
                 <div className="flex gap-3">
                   <Link
                     href={`/aberturas/${abertura.id}/trilha`}
-                    className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-3 rounded-lg font-interface font-semibold hover:bg-blue-700 transition-colors"
+                    className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-3 rounded-lg font-interface font-semibold hover:bg-blue-700 transition-colors cursor-pointer"
                   >
                     <Play size={16} />
                     Estudar
                   </Link>
-                  <button className="flex items-center justify-center gap-2 border border-gray-300 text-gray-700 px-4 py-3 rounded-lg font-interface font-semibold hover:bg-gray-50 transition-colors">
+                  <button className="flex items-center justify-center gap-2 border border-gray-300 text-gray-700 px-4 py-3 rounded-lg font-interface font-semibold hover:bg-gray-50 transition-colors cursor-pointer">
                     <Eye size={16} />
                     Preview
                   </button>
@@ -306,7 +306,7 @@ export default function GaleriaAberturas() {
                 setFilterCategoria('all');
                 setFilterDificuldade('all');
               }}
-              className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-interface font-semibold hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-interface font-semibold hover:bg-blue-700 transition-colors cursor-pointer"
             >
               <Filter size={18} />
               Limpar Filtros

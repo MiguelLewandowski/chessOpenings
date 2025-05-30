@@ -70,7 +70,7 @@ const LicaoNode = ({
   const getIcon = () => {
     if (isCompleted) return <CheckCircle size={20} />;
     if (!isUnlocked) return <Lock size={20} />;
-    if (licao.tipo === 'Interativo') return <Play size={20} />;
+    // Todas as lições são conceituais, usamos BookOpen como padrão
     return <BookOpen size={20} />;
   };
 
@@ -93,10 +93,10 @@ const LicaoNode = ({
       
       {/* Nó da lição */}
       <div className={`
-        relative w-16 h-16 rounded-xl border-3 cursor-pointer transition-all duration-300
+        relative w-16 h-16 rounded-xl border-3 transition-all duration-300
         flex items-center justify-center font-bold text-sm
         ${getNodeStyle()}
-        ${isUnlocked ? 'hover:scale-110' : ''}
+        ${isUnlocked ? 'hover:scale-110 cursor-pointer' : 'cursor-not-allowed'}
       `}>
         {/* Ícone principal */}
         {getIcon()}
@@ -200,7 +200,7 @@ export default function TrilhaLicoes() {
             <div className="flex items-center gap-4 min-w-0 flex-1">
               <Link 
                 href="/aberturas"
-                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors flex-shrink-0"
+                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors flex-shrink-0 cursor-pointer"
               >
                 <ArrowLeft size={20} />
               </Link>
@@ -350,10 +350,7 @@ export default function TrilhaLicoes() {
                 <>
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      {licao.tipo === 'Interativo' ? 
-                        <Play className="text-blue-600" size={20} /> : 
-                        <BookOpen className="text-blue-600" size={20} />
-                      }
+                      <BookOpen className="text-blue-600" size={20} />
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className="font-title text-lg font-bold text-gray-900 truncate">
@@ -370,11 +367,11 @@ export default function TrilhaLicoes() {
                   </p>
                   
                   <div className="flex gap-3">
-                    <button className="flex-1 bg-blue-600 text-white px-4 py-3 rounded-xl font-interface font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 min-w-0">
+                    <button className="flex-1 bg-blue-600 text-white px-4 py-3 rounded-xl font-interface font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 min-w-0 cursor-pointer">
                       <Play size={16} className="flex-shrink-0" />
                       <span className="truncate">Iniciar Lição</span>
                     </button>
-                    <button className="p-3 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors flex-shrink-0">
+                    <button className="p-3 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors flex-shrink-0 cursor-pointer">
                       <Target size={16} />
                     </button>
                   </div>

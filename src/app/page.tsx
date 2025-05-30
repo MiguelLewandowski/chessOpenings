@@ -51,13 +51,13 @@ export default function Home() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="flex items-center justify-center gap-2 font-interface font-semibold bg-blue-600 text-white px-8 py-4 rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg shadow-blue-600/25">
+                <button className="flex items-center justify-center gap-2 font-interface font-semibold bg-blue-600 text-white px-8 py-4 rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg shadow-blue-600/25 cursor-pointer">
                   <Play size={20} />
                   Começar Agora
                 </button>
                 <Link
                   href="/aberturas"
-                  className="flex items-center justify-center gap-2 font-interface font-semibold text-gray-700 px-8 py-4 rounded-xl border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-center gap-2 font-interface font-semibold text-gray-700 px-8 py-4 rounded-xl border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   <BookOpen size={18} />
                   Explorar Aberturas
@@ -104,7 +104,7 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-gray-50 rounded-2xl p-8 hover:shadow-lg transition-all duration-300">
+            <div className="bg-gray-50 rounded-2xl p-8 hover:shadow-lg transition-all duration-300 cursor-pointer">
               <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mb-6">
                 <Brain className="text-white" size={24} />
               </div>
@@ -117,7 +117,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="bg-gray-50 rounded-2xl p-8 hover:shadow-lg transition-all duration-300">
+            <div className="bg-gray-50 rounded-2xl p-8 hover:shadow-lg transition-all duration-300 cursor-pointer">
               <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center mb-6">
                 <Target className="text-white" size={24} />
               </div>
@@ -130,7 +130,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="bg-gray-50 rounded-2xl p-8 hover:shadow-lg transition-all duration-300">
+            <div className="bg-gray-50 rounded-2xl p-8 hover:shadow-lg transition-all duration-300 cursor-pointer">
               <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center mb-6">
                 <BookOpen className="text-white" size={24} />
               </div>
@@ -199,7 +199,7 @@ export default function Home() {
             
             <Link
               href="/aberturas"
-              className="inline-flex items-center gap-3 bg-blue-600 text-white px-8 py-4 rounded-xl font-interface font-semibold hover:bg-blue-700 transition-all duration-200 shadow-lg shadow-blue-600/25"
+              className="inline-flex items-center gap-3 bg-blue-600 text-white px-8 py-4 rounded-xl font-interface font-semibold hover:bg-blue-700 transition-all duration-200 shadow-lg shadow-blue-600/25 cursor-pointer"
             >
               <BookOpen size={20} />
               Explorar Todas as Aberturas
@@ -286,7 +286,7 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-white border-2 border-gray-100 rounded-2xl p-8 hover:border-blue-200 hover:shadow-lg transition-all duration-300">
+            <div className="bg-white border-2 border-gray-100 rounded-2xl p-8 hover:border-blue-200 hover:shadow-lg transition-all duration-300 cursor-pointer">
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
                 <Play className="text-blue-600" size={24} />
               </div>
@@ -298,7 +298,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="bg-white border-2 border-gray-100 rounded-2xl p-8 hover:border-blue-200 hover:shadow-lg transition-all duration-300">
+            <div className="bg-white border-2 border-gray-100 rounded-2xl p-8 hover:border-blue-200 hover:shadow-lg transition-all duration-300 cursor-pointer">
               <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-6">
                 <Zap className="text-green-600" size={24} />
               </div>
@@ -310,7 +310,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="bg-white border-2 border-gray-100 rounded-2xl p-8 hover:border-blue-200 hover:shadow-lg transition-all duration-300">
+            <div className="bg-white border-2 border-gray-100 rounded-2xl p-8 hover:border-blue-200 hover:shadow-lg transition-all duration-300 cursor-pointer">
               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
                 <Shield className="text-purple-600" size={24} />
               </div>
@@ -337,13 +337,13 @@ export default function Home() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-            <button className="flex items-center gap-2 font-interface font-semibold bg-white text-blue-600 px-8 py-4 rounded-xl hover:bg-gray-50 transition-colors shadow-lg w-full sm:w-auto">
+            <button className="flex items-center gap-2 font-interface font-semibold bg-white text-blue-600 px-8 py-4 rounded-xl hover:bg-gray-50 transition-colors shadow-lg w-full sm:w-auto cursor-pointer">
               <Play size={20} />
               Começar Gratuitamente
             </button>
             <Link
               href="/aberturas"
-              className="inline-flex items-center justify-center font-interface font-semibold border-2 border-white text-white px-8 py-4 rounded-xl hover:bg-white hover:text-blue-600 transition-colors w-full sm:w-auto"
+              className="inline-flex items-center justify-center font-interface font-semibold border-2 border-white text-white px-8 py-4 rounded-xl hover:bg-white hover:text-blue-600 transition-colors w-full sm:w-auto cursor-pointer"
             >
               Explorar Aberturas
             </Link>
@@ -389,22 +389,22 @@ export default function Home() {
               </h4>
               <ul className="space-y-2">
                 <li>
-                  <a href="#" className="font-body text-gray-400 hover:text-blue-400 transition-colors text-sm">
+                  <a href="#" className="font-body text-gray-400 hover:text-blue-400 transition-colors text-sm cursor-pointer">
                     Quiz de Perfil
                   </a>
                 </li>
                 <li>
-                  <Link href="/aberturas" className="font-body text-gray-400 hover:text-blue-400 transition-colors text-sm">
+                  <Link href="/aberturas" className="font-body text-gray-400 hover:text-blue-400 transition-colors text-sm cursor-pointer">
                     Galeria de Aberturas
                   </Link>
                 </li>
                 <li>
-                  <a href="#" className="font-body text-gray-400 hover:text-blue-400 transition-colors text-sm">
+                  <a href="#" className="font-body text-gray-400 hover:text-blue-400 transition-colors text-sm cursor-pointer">
                     Lições Interativas
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="font-body text-gray-400 hover:text-blue-400 transition-colors text-sm">
+                  <a href="#" className="font-body text-gray-400 hover:text-blue-400 transition-colors text-sm cursor-pointer">
                     Análise de Progresso
                   </a>
                 </li>
@@ -418,7 +418,7 @@ export default function Home() {
               <ul className="space-y-2">
                 {['Central de Ajuda', 'Documentação', 'Contato', 'Comunidade'].map((item) => (
                   <li key={item}>
-                    <a href="#" className="font-body text-gray-400 hover:text-blue-400 transition-colors text-sm">
+                    <a href="#" className="font-body text-gray-400 hover:text-blue-400 transition-colors text-sm cursor-pointer">
                       {item}
                     </a>
                   </li>
