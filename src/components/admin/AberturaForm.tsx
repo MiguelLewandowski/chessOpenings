@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import {
@@ -54,50 +54,27 @@ export default function AberturaForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isValidSequence, setIsValidSequence] = useState(true);
 
-  // Reset form when modal opens/closes or initialData changes
-  useEffect(() => {
-    if (isOpen) {
-      if (initialData && mode === 'edit') {
-        setFormData(initialData);
-        setMovimentoInput(initialData.movimentos.join(' '));
-        validateAndUpdateBoard(initialData.movimentos.join(' '));
-      } else {
-        setFormData({
-          nome: '',
-          categoria: 'Tática',
-          dificuldade: 'Iniciante',
-          movimentos: [],
-          descricao: '',
-          status: 'Rascunho'
-        });
-        setMovimentoInput('');
-        resetBoard();
-      }
-      setErrors({});
-    }
-  }, [isOpen, initialData, mode]);
-
-  const resetBoard = () => {
+  const resetBoard = useCallback(() => {
     chess.reset();
     setBoardPosition(chess.fen());
     setIsValidSequence(true);
-  };
+  }, [chess]);
 
-  const validateAndUpdateBoard = (movesString: string) => {
+  const validateAndUpdateBoard = useCallback((movesString: string) => {
     const moves = movesString.trim().split(/\s+/).filter(move => move.length > 0);
     
     try {
       chess.reset();
       let isValid = true;
       
-             for (const move of moves) {
-         try {
-           chess.move(move);
-         } catch {
-           isValid = false;
-           break;
-         }
-       }
+      for (const move of moves) {
+        try {
+          chess.move(move);
+        } catch {
+          isValid = false;
+          break;
+        }
+      }
       
       if (isValid) {
         setBoardPosition(chess.fen());
@@ -108,11 +85,45 @@ export default function AberturaForm({
         setIsValidSequence(false);
         setErrors(prev => ({ ...prev, movimentos: 'Sequência de movimentos inválida' }));
       }
-         } catch {
-       setIsValidSequence(false);
-       setErrors(prev => ({ ...prev, movimentos: 'Erro ao validar movimentos' }));
-     }
-  };
+    } catch {
+      setIsValidSequence(false);
+      setErrors(prev => ({ ...prev, movimentos: 'Erro ao validar movimentos' }));
+    }
+  }, [chess]);
+
+  const resetForm = useCallback(() => {
+    setMovimentoInput('');
+    resetBoard();
+    setFormData({
+      nome: '',
+      categoria: 'Tática',
+      dificuldade: 'Iniciante',
+      movimentos: [],
+      descricao: '',
+      status: 'Rascunho'
+    });
+    setErrors({});
+  }, [resetBoard]);
+
+  // Reset form quando modal abre/fecha ou muda de modo
+  useEffect(() => {
+    if (isOpen) {
+      if (mode === 'edit' && initialData) {
+        setFormData(initialData);
+        const movesString = initialData.movimentos.join(' ');
+        setMovimentoInput(movesString);
+        if (movesString) {
+          validateAndUpdateBoard(movesString);
+        } else {
+          resetBoard();
+        }
+      } else {
+        resetForm();
+        resetBoard();
+      }
+      setErrors({});
+    }
+  }, [isOpen, initialData, mode, resetBoard, validateAndUpdateBoard, resetForm]);
 
   const handleMovimentosChange = (value: string) => {
     setMovimentoInput(value);
@@ -165,20 +176,6 @@ export default function AberturaForm({
     }
   };
 
-  const resetForm = () => {
-    setMovimentoInput('');
-    resetBoard();
-    setFormData({
-      nome: '',
-      categoria: 'Tática',
-      dificuldade: 'Iniciante',
-      movimentos: [],
-      descricao: '',
-      status: 'Rascunho'
-    });
-    setErrors({});
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -207,7 +204,7 @@ export default function AberturaForm({
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+              className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
             >
               <X size={24} />
             </button>
@@ -258,7 +255,7 @@ export default function AberturaForm({
                         ...prev, 
                         categoria: e.target.value as AberturaFormData['categoria']
                       }))}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500 cursor-pointer"
                     >
                       <option value="Tática">Tática</option>
                       <option value="Posicional">Posicional</option>
@@ -276,7 +273,7 @@ export default function AberturaForm({
                         ...prev, 
                         dificuldade: e.target.value as AberturaFormData['dificuldade']
                       }))}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500 cursor-pointer"
                     >
                       <option value="Iniciante">Iniciante</option>
                       <option value="Intermediário">Intermediário</option>
@@ -297,7 +294,7 @@ export default function AberturaForm({
                         setMovimentoInput('');
                         resetBoard();
                       }}
-                      className="flex items-center gap-2 text-gray-500 hover:text-gray-700 text-sm"
+                      className="flex items-center gap-2 text-gray-500 hover:text-gray-700 text-sm cursor-pointer"
                     >
                       <RotateCcw size={16} />
                       Resetar
@@ -332,7 +329,7 @@ export default function AberturaForm({
                     <button
                       type="button"
                       onClick={() => setShowPreview(!showPreview)}
-                      className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-interface font-semibold"
+                      className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-interface font-semibold cursor-pointer"
                     >
                       {showPreview ? <EyeOff size={16} /> : <Eye size={16} />}
                       {showPreview ? 'Ocultar' : 'Mostrar'} Preview
@@ -379,7 +376,7 @@ export default function AberturaForm({
                       ...prev, 
                       status: e.target.value as AberturaFormData['status']
                     }))}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500 cursor-pointer"
                   >
                     <option value="Rascunho">Rascunho</option>
                     <option value="Ativo">Ativo</option>
@@ -428,7 +425,7 @@ export default function AberturaForm({
             <button
               type="button"
               onClick={resetForm}
-              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 font-interface font-semibold"
+              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 font-interface font-semibold cursor-pointer"
             >
               <RotateCcw size={18} />
               Limpar Formulário
@@ -438,14 +435,14 @@ export default function AberturaForm({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg font-interface font-semibold hover:bg-gray-50 transition-colors"
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg font-interface font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={!canSubmit()}
-                className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg font-interface font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg font-interface font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors cursor-pointer"
               >
                 <Save size={18} />
                 {mode === 'create' ? 'Criar Abertura' : 'Salvar Alterações'}
