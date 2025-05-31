@@ -72,16 +72,18 @@ export const useLicaoProgress = (exercicios: Exercicio[]) => {
       const newTotalScore = newProgress.reduce((sum, p) => sum + p.score, 0);
       const newTotalTime = newProgress.reduce((sum, p) => sum + p.timeSpent, 0);
       
-      // Verificar se é o último exercício e se foi completado
+      // 🎯 CORREÇÃO MELHORADA: Verificar se é realmente o último exercício
       const isLastExercicio = currentIndex === exercicios.length - 1;
-      const isLicaoCompleted = isLastExercicio && newProgress[currentIndex]?.completed;
+      const exercicioJustCompleted = newProgress[currentIndex]?.completed;
+      const isLicaoCompleted = isLastExercicio && exercicioJustCompleted;
       
-      console.log('Debug conclusão lição:', {
+      console.log('🎯 Debug conclusão lição - CORRIGIDO:', {
         currentIndex,
         exerciciosLength: exercicios.length,
         isLastExercicio,
-        exercicioCompleted: newProgress[currentIndex]?.completed,
-        isLicaoCompleted
+        exercicioJustCompleted,
+        isLicaoCompleted,
+        previousIsCompleted: prev.isCompleted
       });
       
       return {
@@ -100,15 +102,17 @@ export const useLicaoProgress = (exercicios: Exercicio[]) => {
   const nextExercicio = useCallback(() => {
     setProgressState(prev => {
       const nextIndex = prev.currentExercicioIndex + 1;
-      const isLastExercicio = nextIndex >= exerciciosLength;
       
+      // 🎯 CORREÇÃO: Não modificar isCompleted aqui!
+      // A conclusão da lição deve ser determinada apenas quando 
+      // o último exercício for realmente completado
       return {
         ...prev,
-        currentExercicioIndex: nextIndex,
-        isCompleted: isLastExercicio
+        currentExercicioIndex: nextIndex
+        // ❌ Removido: isCompleted: isLastExercicio
       };
     });
-  }, [exerciciosLength]);
+  }, []);
 
   const prevExercicio = useCallback(() => {
     setProgressState(prev => ({
@@ -146,6 +150,23 @@ export const useLicaoProgress = (exercicios: Exercicio[]) => {
     });
   }, []);
 
+  const goToExercicio = useCallback((targetIndex: number) => {
+    setProgressState(prev => {
+      // Verificar se pode navegar para o exercício alvo
+      const targetProgress = prev.exerciciosProgress[targetIndex];
+      const isAccessible = targetIndex <= prev.currentExercicioIndex || targetProgress?.completed;
+      
+      if (!isAccessible || targetIndex < 0 || targetIndex >= exerciciosLength) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        currentExercicioIndex: targetIndex
+      };
+    });
+  }, [exerciciosLength]);
+
   // Memoizar valores derivados para evitar recriação desnecessária
   const hasNext = useMemo(() => 
     progressState.currentExercicioIndex < exerciciosLength - 1, 
@@ -163,6 +184,7 @@ export const useLicaoProgress = (exercicios: Exercicio[]) => {
     completeCurrentExercicio,
     nextExercicio,
     prevExercicio,
+    goToExercicio,
     canGoNext,
     getProgressPercentage,
     addAttempt,

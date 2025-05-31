@@ -207,6 +207,39 @@ export function useLicoes() {
     };
   }, [licoes]);
 
+  // Reordenar lições de uma abertura
+  const reorderLicoes = useCallback(async (aberturaId: string, licoesReordenadas: Licao[]): Promise<void> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Simular delay de API
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Criar novo array com as lições reordenadas
+      const newLicoes = licoes.map(licao => {
+        // Se a lição pertence à abertura sendo reordenada, usa a versão reordenada
+        const licaoReordenada = licoesReordenadas.find(l => l.id === licao.id);
+        if (licaoReordenada) {
+          return {
+            ...licaoReordenada,
+            atualizadoEm: new Date().toISOString().split('T')[0]
+          };
+        }
+        // Senão, mantém a lição original
+        return licao;
+      });
+
+      updateStateAndStorage(newLicoes);
+    } catch {
+      const errorMessage = 'Erro ao reordenar lições';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [licoes, updateStateAndStorage]);
+
   return {
     licoes,
     loading,
@@ -219,6 +252,7 @@ export function useLicoes() {
     filterLicoes,
     getLicoesByAbertura,
     getStats,
+    reorderLicoes,
     clearError: () => setError(null)
   };
 } 
