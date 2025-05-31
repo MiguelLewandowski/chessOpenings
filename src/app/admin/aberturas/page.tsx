@@ -190,7 +190,7 @@ Confirmar exclusão?`;
             <select
               value={filterCategoria}
               onChange={(e) => setFilterCategoria(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
+              className="px-4 py-3 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white cursor-pointer"
             >
               <option value="all">Todas as categorias</option>
               <option value="Tática">Tática</option>
@@ -201,7 +201,7 @@ Confirmar exclusão?`;
             <select
               value={filterDificuldade}
               onChange={(e) => setFilterDificuldade(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
+              className="px-4 py-3 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white cursor-pointer"
             >
               <option value="all">Todas as dificuldades</option>
               <option value="Iniciante">Iniciante</option>

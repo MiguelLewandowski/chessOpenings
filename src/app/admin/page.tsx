@@ -1,318 +1,388 @@
 'use client';
 
+import { useState } from 'react';
+import Link from 'next/link';
 import {
+  Crown,
   BookOpen,
   Target,
-  Puzzle,
-  Users,
-  TrendingUp,
   Plus,
-  BarChart3,
-  Clock,
-  CheckCircle2,
-  Activity,
-  Zap
+  Eye,
+  Edit
 } from 'lucide-react';
-import LocalStorageDebug from '@/components/admin/LocalStorageDebug';
+import { useAberturas, type Abertura } from '@/hooks/useAberturas';
+import { useLicoes, type Licao } from '@/hooks/useLicoes';
+import { useExercicios, type Exercicio } from '@/hooks/useExercicios';
 
 export default function AdminDashboard() {
-  // Dados mockados - em produção viriam de uma API
-  const stats = [
-    {
-      title: 'Total de Aberturas',
-      value: '24',
-      change: '+3 este mês',
-      changeType: 'positive',
-      icon: BookOpen,
-      color: 'blue',
-      gradient: 'from-blue-500 to-blue-600'
-    },
-    {
-      title: 'Lições Criadas',
-      value: '156',
-      change: '+12 esta semana',
-      changeType: 'positive',
-      icon: Target,
-      color: 'green',
-      gradient: 'from-green-500 to-green-600'
-    },
-    {
-      title: 'Exercícios Ativos',
-      value: '89',
-      change: '+5 hoje',
-      changeType: 'positive',
-      icon: Puzzle,
-      color: 'purple',
-      gradient: 'from-purple-500 to-purple-600'
-    },
-    {
-      title: 'Usuários Ativos',
-      value: '1,247',
-      change: '+87 esta semana',
-      changeType: 'positive',
-      icon: Users,
-      color: 'orange',
-      gradient: 'from-orange-500 to-orange-600'
-    }
-  ];
+  const [selectedAbertura, setSelectedAbertura] = useState<string>('all');
+  
+  const { aberturas } = useAberturas();
+  const { licoes } = useLicoes();
+  const { exercicios } = useExercicios();
 
-  const recentActivity = [
-    {
-      type: 'abertura',
-      title: 'Nova abertura adicionada: Defesa Siciliana',
-      time: '2 horas atrás',
-      status: 'completed',
-      icon: BookOpen,
-      color: 'blue'
-    },
-    {
-      type: 'licao',
-      title: 'Lição "Gambito da Dama" atualizada',
-      time: '4 horas atrás',
-      status: 'completed',
-      icon: Target,
-      color: 'green'
-    },
-    {
-      type: 'exercicio',
-      title: 'Exercício de táticas criado',
-      time: '1 dia atrás',
-      status: 'pending',
-      icon: Puzzle,
-      color: 'purple'
-    },
-    {
-      type: 'abertura',
-      title: 'Abertura Inglesa revisada',
-      time: '2 dias atrás',
-      status: 'completed',
-      icon: BookOpen,
-      color: 'blue'
-    }
-  ];
+  // Estatísticas gerais
+  const totalAberturas = aberturas.length;
+  const totalLicoes = licoes.length;
+  const totalExercicios = exercicios.length;
 
-  const quickActions = [
-    {
-      title: 'Nova Abertura',
-      description: 'Adicionar uma nova abertura ao catálogo',
-      href: '/admin/aberturas/nova',
-      icon: BookOpen,
-      color: 'blue',
-      gradient: 'from-blue-500 to-blue-600'
-    },
-    {
-      title: 'Criar Lição',
-      description: 'Desenvolver uma nova lição interativa',
-      href: '/admin/licoes/nova',
-      icon: Target,
-      color: 'green',
-      gradient: 'from-green-500 to-green-600'
-    },
-    {
-      title: 'Novo Exercício',
-      description: 'Configurar um exercício prático',
-      href: '/admin/exercicios/novo',
-      icon: Puzzle,
-      color: 'purple',
-      gradient: 'from-purple-500 to-purple-600'
-    }
-  ];
-
-  const colorClasses: Record<string, string> = {
-    blue: 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-blue-200',
-    green: 'bg-gradient-to-br from-green-500 to-green-600 text-white shadow-green-200',
-    purple: 'bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-purple-200',
-    orange: 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-orange-200'
+  // Estatísticas por abertura
+  const getAberturaStats = (aberturaId: string) => {
+    const licoesAbertura = licoes.filter(l => l.aberturaId === aberturaId);
+    const exerciciosAbertura = exercicios.filter(e => 
+      licoesAbertura.some(l => l.id === e.licaoId)
+    );
+    
+    return {
+      licoes: licoesAbertura.length,
+      exercicios: exerciciosAbertura.length
+    };
   };
 
-  const colorVariants: Record<string, string> = {
-    blue: 'text-blue-700 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200',
-    green: 'text-green-700 bg-gradient-to-br from-green-50 to-green-100 border-green-200',
-    purple: 'text-purple-700 bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200',
-    orange: 'text-orange-700 bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200'
-  };
+  // Aberturas filtradas
+  const aberturasComEstatisticas = aberturas.map(abertura => ({
+    ...abertura,
+    stats: getAberturaStats(abertura.id)
+  }));
+
+  const aberturasFiltradas = selectedAbertura === 'all' 
+    ? aberturasComEstatisticas 
+    : aberturasComEstatisticas.filter(a => a.id === selectedAbertura);
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+      {/* Header do Dashboard */}
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-title text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="font-title text-3xl font-bold text-gray-900">
             Dashboard Administrativo
           </h1>
-          <p className="font-body text-lg text-gray-600">
-            Visão geral e gerenciamento do sistema ChessOpenings
+          <p className="font-body text-gray-600 mt-2">
+            Visão geral e navegação hierárquica do conteúdo
           </p>
         </div>
+        
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-interface font-bold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base cursor-pointer">
-            <Plus size={20} />
-            Novo Conteúdo
-          </button>
+          <Link
+            href="/admin/aberturas?create=true"
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+          >
+            <Plus size={18} />
+            Nova Abertura
+          </Link>
         </div>
       </div>
 
-      {/* Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <div key={index} className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl border border-gray-100 transition-all duration-300 hover:transform hover:scale-105 cursor-pointer">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex-1">
-                <p className="font-body text-sm font-medium text-gray-600 uppercase tracking-wide">
-                  {stat.title}
-                </p>
-                <p className="font-title text-3xl font-bold text-gray-900 mt-2 mb-3">
-                  {stat.value}
-                </p>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1 bg-green-50 px-2 py-1 rounded-full">
-                    <TrendingUp size={12} className="text-green-600" />
-                    <span className="font-body text-xs font-semibold text-green-600">
-                      {stat.change}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg ${colorClasses[stat.color]}`}>
-                <stat.icon size={28} />
-              </div>
+      {/* Estatísticas Gerais */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-body text-sm text-gray-600">Total de Aberturas</p>
+              <p className="font-title text-3xl font-bold text-blue-600">{totalAberturas}</p>
+            </div>
+            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+              <Crown className="text-blue-600" size={24} />
             </div>
           </div>
-        ))}
-      </div>
-
-      {/* Ações Rápidas */}
-      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-            <Zap className="text-white" size={20} />
-          </div>
-          <h2 className="font-title text-2xl font-bold text-gray-900">
-            Ações Rápidas
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {quickActions.map((action, index) => (
-            <button
-              key={index}
-              className="p-6 border-2 border-gray-100 rounded-2xl hover:border-gray-200 hover:shadow-lg transition-all duration-300 text-left group hover:transform hover:scale-105 cursor-pointer"
+          <div className="mt-4">
+            <Link 
+              href="/admin/aberturas"
+              className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
             >
-              <div className="flex items-center gap-4 mb-4">
-                <div className={`w-14 h-14 rounded-xl flex items-center justify-center shadow-md border ${colorVariants[action.color]}`}>
-                  <action.icon size={24} />
-                </div>
-                <h3 className="font-interface font-bold text-lg text-gray-900 group-hover:text-blue-600 transition-colors">
-                  {action.title}
-                </h3>
-              </div>
-              <p className="font-body text-gray-600 leading-relaxed">
-                {action.description}
-              </p>
-            </button>
-          ))}
+              <Eye size={16} />
+              Gerenciar Aberturas
+            </Link>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-body text-sm text-gray-600">Total de Lições</p>
+              <p className="font-title text-3xl font-bold text-green-600">{totalLicoes}</p>
+            </div>
+            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+              <BookOpen className="text-green-600" size={24} />
+            </div>
+          </div>
+          <div className="mt-4">
+            <Link 
+              href="/admin/licoes"
+              className="text-green-600 hover:text-green-800 text-sm font-medium flex items-center gap-1"
+            >
+              <Eye size={16} />
+              Gerenciar Lições
+            </Link>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-body text-sm text-gray-600">Total de Exercícios</p>
+              <p className="font-title text-3xl font-bold text-purple-600">{totalExercicios}</p>
+            </div>
+            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+              <Target className="text-purple-600" size={24} />
+            </div>
+          </div>
+          <div className="mt-4">
+            <Link 
+              href="/admin/exercicios"
+              className="text-purple-600 hover:text-purple-800 text-sm font-medium flex items-center gap-1"
+            >
+              <Eye size={16} />
+              Gerenciar Exercícios
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* Debug LocalStorage */}
-      <LocalStorageDebug />
-
-      {/* Grid com Atividade Recente e Estatísticas */}
-      <div className="grid lg:grid-cols-2 gap-8">
-        {/* Atividade Recente */}
-        <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
-                <Activity className="text-white" size={20} />
-              </div>
-              <h2 className="font-title text-2xl font-bold text-gray-900">
-                Atividade Recente
-              </h2>
-            </div>
-            <button className="font-interface text-sm text-blue-600 hover:text-blue-700 font-semibold bg-blue-50 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer">
-              Ver todas
-            </button>
+      {/* Filtro por Abertura */}
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="font-title text-xl font-bold text-gray-900">
+            Navegação Hierárquica
+          </h2>
+          <div className="flex items-center gap-3">
+            <label className="font-body text-sm text-gray-700">Filtrar por abertura:</label>
+            <select
+              value={selectedAbertura}
+              onChange={(e) => setSelectedAbertura(e.target.value)}
+              className="px-4 py-2 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white cursor-pointer"
+            >
+              <option value="all">Todas as aberturas</option>
+              {aberturas.map(abertura => (
+                <option key={abertura.id} value={abertura.id}>
+                  {abertura.nome}
+                </option>
+              ))}
+            </select>
           </div>
-          <div className="space-y-4">
-            {recentActivity.map((activity, index) => (
-              <div key={index} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer">
-                <div className="flex-shrink-0">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${colorVariants[activity.color]}`}>
-                    <activity.icon size={18} />
+        </div>
+
+        <div className="space-y-4">
+          {aberturasFiltradas.map(abertura => (
+            <AberturaCard 
+              key={abertura.id} 
+              abertura={abertura}
+              licoes={licoes.filter(l => l.aberturaId === abertura.id)}
+              exercicios={exercicios}
+            />
+          ))}
+          
+          {aberturasFiltradas.length === 0 && (
+            <div className="text-center py-12">
+              <Crown size={48} className="text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600 font-body">Nenhuma abertura encontrada</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Componente para card expandível de abertura
+function AberturaCard({ 
+  abertura, 
+  licoes, 
+  exercicios 
+}: { 
+  abertura: Abertura & { stats: { licoes: number; exercicios: number } }; 
+  licoes: Licao[]; 
+  exercicios: Exercicio[];
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  const licoesOrdenadas = licoes.sort((a, b) => a.ordem - b.ordem);
+
+  return (
+    <div className="border border-gray-200 rounded-lg overflow-hidden">
+      {/* Header da Abertura */}
+      <div 
+        className="p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <Crown className="text-blue-600" size={20} />
+            </div>
+            <div>
+              <h3 className="font-title text-lg font-bold text-gray-900">
+                {abertura.nome}
+              </h3>
+              <p className="font-body text-sm text-gray-600">
+                {abertura.categoria} • {abertura.dificuldade}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-6">
+            <div className="text-center">
+              <p className="font-title text-lg font-bold text-green-600">
+                {abertura.stats.licoes}
+              </p>
+              <p className="font-body text-xs text-gray-500">Lições</p>
+            </div>
+            <div className="text-center">
+              <p className="font-title text-lg font-bold text-purple-600">
+                {abertura.stats.exercicios}
+              </p>
+              <p className="font-body text-xs text-gray-500">Exercícios</p>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/admin/aberturas?edit=${abertura.id}`}
+                className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Edit size={16} />
+              </Link>
+              <div className="text-gray-400">
+                {isExpanded ? '−' : '+'}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Lista de Lições Expandida */}
+      {isExpanded && (
+        <div className="border-t border-gray-200">
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="font-title text-md font-semibold text-gray-800">
+                Lições ({licoesOrdenadas.length})
+              </h4>
+              <Link
+                href={`/admin/licoes?create=true&aberturaId=${abertura.id}`}
+                className="flex items-center gap-1 text-green-600 hover:text-green-800 text-sm font-medium"
+              >
+                <Plus size={16} />
+                Nova Lição
+              </Link>
+            </div>
+            
+            {licoesOrdenadas.length > 0 ? (
+              <div className="space-y-2">
+                {licoesOrdenadas.map(licao => (
+                  <LicaoItem 
+                    key={licao.id} 
+                    licao={licao} 
+                    exercicios={exercicios.filter(e => e.licaoId === licao.id)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <BookOpen size={32} className="mx-auto mb-2" />
+                <p className="font-body text-sm">Nenhuma lição criada ainda</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Componente para item de lição
+function LicaoItem({ licao, exercicios }: { licao: Licao; exercicios: Exercicio[] }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  const exerciciosOrdenados = exercicios.sort((a, b) => a.ordem - b.ordem);
+
+  return (
+    <div className="border border-gray-100 rounded-lg">
+      {/* Header da Lição */}
+      <div 
+        className="p-3 hover:bg-gray-50 cursor-pointer transition-colors"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 bg-green-100 rounded flex items-center justify-center">
+              <span className="text-green-600 text-xs font-bold">{licao.ordem}</span>
+            </div>
+            <div className="flex-1">
+              <h5 className="font-body text-sm font-semibold text-gray-800">
+                {licao.titulo}
+              </h5>
+              <p className="font-body text-xs text-gray-500">
+                {licao.estimativaTempo}min • {exerciciosOrdenados.length} exercícios
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <span className={`px-2 py-1 rounded text-xs font-medium ${
+              licao.status === 'Ativo' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+            }`}>
+              {licao.status}
+            </span>
+            <Link
+              href={`/admin/licoes?edit=${licao.id}`}
+              className="p-1 text-gray-400 hover:text-green-600 transition-colors"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Edit size={14} />
+            </Link>
+            <div className="text-gray-400 text-xs">
+              {isExpanded ? '−' : '+'}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Lista de Exercícios Expandida */}
+      {isExpanded && exerciciosOrdenados.length > 0 && (
+        <div className="border-t border-gray-100 p-3 bg-gray-25">
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-body text-xs font-medium text-gray-600">
+              Exercícios ({exerciciosOrdenados.length})
+            </span>
+            <Link
+              href={`/admin/exercicios?create=true&licaoId=${licao.id}`}
+              className="flex items-center gap-1 text-purple-600 hover:text-purple-800 text-xs font-medium"
+            >
+              <Plus size={12} />
+              Novo
+            </Link>
+          </div>
+          <div className="space-y-1">
+            {exerciciosOrdenados.map(exercicio => (
+              <div 
+                key={exercicio.id}
+                className="flex items-center justify-between p-2 bg-white rounded border border-gray-100"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-purple-100 rounded flex items-center justify-center">
+                    <span className="text-purple-600 text-xs font-bold">{exercicio.ordem}</span>
                   </div>
+                  <span className="font-body text-xs text-gray-700">{exercicio.titulo}</span>
+                  <span className={`px-1 py-0.5 rounded text-xs ${
+                    exercicio.tipo === 'Passivo' ? 'bg-yellow-100 text-yellow-700' :
+                    exercicio.tipo === 'Interativo' ? 'bg-blue-100 text-blue-700' :
+                    'bg-green-100 text-green-700'
+                  }`}>
+                    {exercicio.tipo}
+                  </span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-body font-medium text-gray-900">
-                    {activity.title}
-                  </p>
-                  <p className="font-body text-sm text-gray-500 mt-1">
-                    {activity.time}
-                  </p>
-                </div>
-                <div className="flex-shrink-0">
-                  {activity.status === 'completed' ? (
-                    <CheckCircle2 size={20} className="text-green-500" />
-                  ) : (
-                    <Clock size={20} className="text-orange-500" />
-                  )}
-                </div>
+                <Link
+                  href={`/admin/exercicios?edit=${exercicio.id}`}
+                  className="p-1 text-gray-400 hover:text-purple-600 transition-colors"
+                >
+                  <Edit size={12} />
+                </Link>
               </div>
             ))}
           </div>
         </div>
-
-        {/* Gráfico de Progresso */}
-        <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <BarChart3 className="text-white" size={20} />
-              </div>
-              <h2 className="font-title text-2xl font-bold text-gray-900">
-                Progresso do Mês
-              </h2>
-            </div>
-          </div>
-          <div className="space-y-6">
-            <div>
-              <div className="flex justify-between items-center mb-3">
-                <div className="flex items-center gap-2">
-                  <BookOpen size={16} className="text-blue-600" />
-                  <span className="font-body font-medium text-gray-700">Aberturas</span>
-                </div>
-                <span className="font-interface font-bold text-lg text-blue-600">80%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full shadow-sm" style={{ width: '80%' }}></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between items-center mb-3">
-                <div className="flex items-center gap-2">
-                  <Target size={16} className="text-green-600" />
-                  <span className="font-body font-medium text-gray-700">Lições</span>
-                </div>
-                <span className="font-interface font-bold text-lg text-green-600">65%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div className="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full shadow-sm" style={{ width: '65%' }}></div>
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between items-center mb-3">
-                <div className="flex items-center gap-2">
-                  <Puzzle size={16} className="text-purple-600" />
-                  <span className="font-body font-medium text-gray-700">Exercícios</span>
-                </div>
-                <span className="font-interface font-bold text-lg text-purple-600">90%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div className="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full shadow-sm" style={{ width: '90%' }}></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 } 
