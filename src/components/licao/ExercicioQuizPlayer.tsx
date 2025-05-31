@@ -19,11 +19,26 @@ export default function ExercicioQuizPlayer({
   const [isCompleted, setIsCompleted] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [timeLeft, setTimeLeft] = useState(exercicio.tempoLimite || 0);
-  const [startTime] = useState(Date.now());
+  const [startTime, setStartTime] = useState(Date.now());
   const [previewPosition, setPreviewPosition] = useState(exercicio.conteudo.posicaoInicial);
 
   const opcoes = exercicio.conteudo.opcoes || [];
   const opcaoCorreta = opcoes.find(op => op.correta);
+
+  // 🎯 CORREÇÃO: Reset completo quando o exercício muda
+  useEffect(() => {
+    console.log('🔄 Exercício mudou - resetando ExercicioQuizPlayer:', exercicio.id);
+    
+    // Resetar todos os estados para novo exercício
+    setSelectedOption(null);
+    setIsCompleted(false);
+    setShowResults(false);
+    setTimeLeft(exercicio.tempoLimite || 0);
+    setStartTime(Date.now());
+    setPreviewPosition(exercicio.conteudo.posicaoInicial);
+    
+    console.log('✅ Estados resetados para novo exercício quiz');
+  }, [exercicio.id, exercicio.conteudo.posicaoInicial, exercicio.tempoLimite]);
 
   // Timer para exercícios com tempo limite
   useEffect(() => {
@@ -77,7 +92,7 @@ export default function ExercicioQuizPlayer({
     setTimeout(() => {
       const timeSpent = Math.floor((Date.now() - startTime) / 1000);
       onComplete(finalScore, timeSpent);
-    }, 3000); // Dar tempo para ler o resultado
+    }, 800); // 🎯 REDUZIDO: de 3000ms para 800ms para transição mais rápida
   };
 
   const formatTime = (seconds: number) => {

@@ -22,10 +22,30 @@ export default function ExercicioInterativoPlayer({
   const [feedbackType, setFeedbackType] = useState<'success' | 'error' | null>(null);
   const [showHint, setShowHint] = useState(false);
   const [timeLeft, setTimeLeft] = useState(exercicio.tempoLimite || 0);
-  const [startTime] = useState(Date.now());
+  const [startTime, setStartTime] = useState(Date.now());
 
   const maxAttempts = exercicio.tentativasMaximas || 3;
   const movimentoCorreto = exercicio.conteudo.movimentoCorreto;
+
+  // 🎯 CORREÇÃO: Reset completo quando o exercício muda
+  useEffect(() => {
+    console.log('🔄 Exercício mudou - resetando ExercicioInterativoPlayer:', exercicio.id);
+    
+    // Resetar o jogo chess.js com a nova posição inicial
+    const newGame = new Chess(exercicio.conteudo.posicaoInicial);
+    setGame(newGame);
+    
+    // Resetar todos os estados
+    setIsCompleted(false);
+    setAttempts(0);
+    setFeedback(null);
+    setFeedbackType(null);
+    setShowHint(false);
+    setTimeLeft(exercicio.tempoLimite || 0);
+    setStartTime(Date.now());
+    
+    console.log('✅ Estados resetados para novo exercício');
+  }, [exercicio.id, exercicio.conteudo.posicaoInicial, exercicio.tempoLimite]);
 
   // Timer para exercícios com tempo limite
   useEffect(() => {
@@ -87,14 +107,14 @@ export default function ExercicioInterativoPlayer({
         setIsCompleted(true);
         console.log('Estados definidos: isCompleted=true, feedbackType=success');
         
-        // Calcular pontuação e chamar onComplete após 2 segundos
+        // Calcular pontuação e chamar onComplete após tempo reduzido
         const scoreMultiplier = Math.max(0.3, 1 - (attempts * 0.2));
         const finalScore = Math.floor(exercicio.pontuacao * scoreMultiplier);
         
         setTimeout(() => {
           const timeSpent = Math.floor((Date.now() - startTime) / 1000);
           onComplete(finalScore, timeSpent);
-        }, 2000);
+        }, 800);
       } else {
         // Movimento incorreto
         if (attempts >= maxAttempts - 1) {
@@ -237,7 +257,7 @@ export default function ExercicioInterativoPlayer({
                 {feedbackType === 'success' && isCompleted && (
                   <div className="mt-3 pt-3 border-t border-green-200">
                     <p className="text-xs text-green-600">
-                      ⏱️ Continuando automaticamente em alguns segundos...
+                      ✅ Exercício concluído! Use os controles de navegação para continuar.
                     </p>
                   </div>
                 )}

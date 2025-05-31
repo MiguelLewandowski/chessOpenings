@@ -18,9 +18,23 @@ export default function ExercicioPassivoPlayer({
   const [isPlaying, setIsPlaying] = useState(false);
   const [boardPosition, setBoardPosition] = useState(exercicio.conteudo.posicaoInicial);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [startTime] = useState(Date.now());
+  const [startTime, setStartTime] = useState(Date.now());
 
   const movimentos = exercicio.conteudo.sequenciaMovimentos || [];
+
+  // 🎯 CORREÇÃO: Reset completo quando o exercício muda
+  useEffect(() => {
+    console.log('🔄 Exercício mudou - resetando ExercicioPassivoPlayer:', exercicio.id);
+    
+    // Resetar todos os estados para novo exercício
+    setCurrentMoveIndex(-1);
+    setBoardPosition(exercicio.conteudo.posicaoInicial);
+    setIsPlaying(false);
+    setIsCompleted(false);
+    setStartTime(Date.now());
+    
+    console.log('✅ Estados resetados para novo exercício passivo');
+  }, [exercicio.id, exercicio.conteudo.posicaoInicial]);
 
   const resetToInitial = useCallback(() => {
     setCurrentMoveIndex(-1);
@@ -69,7 +83,7 @@ export default function ExercicioPassivoPlayer({
     if (isPlaying && !isCompleted) {
       const timer = setTimeout(() => {
         goToNextMove();
-      }, 2000); // 2 segundos por movimento
+      }, 1200); // 🎯 REDUZIDO: de 2000ms para 1200ms para reprodução mais fluida
 
       return () => clearTimeout(timer);
     }
@@ -284,7 +298,7 @@ export default function ExercicioPassivoPlayer({
                 onClick={handleComplete}
                 className="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors text-sm"
               >
-                Continuar para Próximo Exercício
+                ✅ Marcar como Concluído
               </button>
             </div>
           )}
