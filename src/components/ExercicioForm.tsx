@@ -343,7 +343,7 @@ export default function ExercicioForm({
                 <select
                   value={formData.licaoId}
                   onChange={(e) => setFormData({ ...formData, licaoId: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 cursor-pointer"
+                  className="mt-1 block w-full rounded-lg border-gray-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-3 font-body bg-white cursor-pointer"
                   disabled={loading}
                 >
                   <option value="">Selecione uma lição</option>
@@ -374,7 +374,7 @@ export default function ExercicioForm({
                 <select
                   value={formData.tipo}
                   onChange={(e) => setFormData({ ...formData, tipo: e.target.value as 'Passivo' | 'Interativo' | 'Quiz' })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 cursor-pointer"
+                  className="mt-1 block w-full rounded-lg border-gray-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-3 font-body bg-white cursor-pointer"
                   disabled={loading}
                 >
                   <option value="Passivo">Passivo (Demonstração)</option>
@@ -396,7 +396,7 @@ export default function ExercicioForm({
                 <select
                   value={formData.dificuldade}
                   onChange={(e) => setFormData({ ...formData, dificuldade: e.target.value as 'Iniciante' | 'Intermediário' | 'Avançado' })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 cursor-pointer"
+                  className="mt-1 block w-full rounded-lg border-gray-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-3 font-body bg-white cursor-pointer"
                   disabled={loading}
                 >
                   <option value="Iniciante">Iniciante</option>
@@ -413,7 +413,7 @@ export default function ExercicioForm({
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value as 'Ativo' | 'Rascunho' | 'Arquivado' })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 cursor-pointer"
+                  className="mt-1 block w-full rounded-lg border-gray-200 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-3 font-body bg-white cursor-pointer"
                   disabled={loading}
                 >
                   <option value="Ativo">Ativo</option>

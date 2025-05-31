@@ -120,9 +120,9 @@ export default function LicaoForm({
             <select
               value={formData.aberturaId}
               onChange={(e) => setFormData({ ...formData, aberturaId: e.target.value })}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.aberturaId ? 'border-red-500' : 'border-gray-300'
-              } cursor-pointer`}
+              className={`w-full px-4 py-3 border rounded-lg font-body focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white cursor-pointer ${
+                errors.aberturaId ? 'border-red-500' : 'border-gray-200'
+              }`}
               disabled={loading}
             >
               <option value="">Selecione uma abertura</option>
