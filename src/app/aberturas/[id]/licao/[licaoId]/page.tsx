@@ -22,6 +22,7 @@ export default function LicaoPage() {
   const { exercicios } = useExercicios();
 
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [showExercicioCompleted, setShowExercicioCompleted] = useState(false);
 
   // Buscar dados
   const abertura = aberturas.find(a => a.id === aberturaId);
@@ -50,6 +51,7 @@ export default function LicaoPage() {
     completeCurrentExercicio,
     nextExercicio,
     prevExercicio,
+    goToExercicio,
     canGoNext,
     getProgressPercentage,
     isCompleted,
@@ -71,11 +73,9 @@ export default function LicaoPage() {
   const handleExercicioComplete = (score: number, timeSpent: number) => {
     completeCurrentExercicio(score, timeSpent);
     
-    if (hasNext) {
-      setTimeout(() => {
-        nextExercicio();
-      }, 1000);
-    }
+    // Mostrar notificação discreta
+    setShowExercicioCompleted(true);
+    setTimeout(() => setShowExercicioCompleted(false), 2000);
   };
 
   const handleBackToTrilha = () => {
@@ -199,41 +199,110 @@ export default function LicaoPage() {
         </div>
 
         {/* Navegação entre exercícios */}
-        <div className="flex items-center justify-between max-w-lg mx-auto">
-          <button
-            onClick={prevExercicio}
-            disabled={!hasPrev}
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <ChevronLeft size={20} />
-            <span>Anterior</span>
-          </button>
-
-          <div className="flex items-center gap-2">
-            {exerciciosLicao.map((_, index) => (
-              <div
-                key={index}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  index === currentExercicioIndex
-                    ? 'bg-blue-500'
-                    : index < currentExercicioIndex
-                    ? 'bg-green-500'
-                    : 'bg-gray-300'
-                }`}
-              />
-            ))}
+        <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 max-w-2xl mx-auto">
+          <div className="text-center mb-3">
+            <p className="text-sm text-gray-600 font-medium">
+              Navegação da Lição
+            </p>
           </div>
+          
+          <div className="flex items-center justify-between">
+            <button
+              onClick={prevExercicio}
+              disabled={!hasPrev}
+              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-lg hover:bg-gray-50"
+            >
+              <ChevronLeft size={20} />
+              <span>Anterior</span>
+            </button>
 
-          <button
-            onClick={nextExercicio}
-            disabled={!canGoNext() || !hasNext}
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <span>Próximo</span>
-            <ChevronRight size={20} />
-          </button>
+            <div className="flex items-center gap-3">
+              {exerciciosLicao.map((exercicio, index) => {
+                const isCompleted = progressHook.exerciciosProgress[index]?.completed;
+                const isCurrent = index === currentExercicioIndex;
+                const isAccessible = index <= currentExercicioIndex || isCompleted;
+                
+                return (
+                  <div key={index} className="flex flex-col items-center gap-1">
+                    <button
+                      onClick={() => {
+                        if (isAccessible) {
+                          goToExercicio(index);
+                        }
+                      }}
+                      disabled={!isAccessible}
+                      className={`w-4 h-4 rounded-full transition-all duration-200 ${
+                        isCurrent
+                          ? 'bg-blue-500 ring-2 ring-blue-200'
+                          : isCompleted
+                          ? 'bg-green-500 hover:bg-green-600 cursor-pointer'
+                          : isAccessible
+                          ? 'bg-gray-400 hover:bg-gray-500 cursor-pointer'
+                          : 'bg-gray-300 cursor-not-allowed'
+                      }`}
+                      title={
+                        isCurrent 
+                          ? `Exercício atual: ${exercicio.titulo}`
+                          : isCompleted
+                          ? `Completado: ${exercicio.titulo} - Clique para revisar`
+                          : isAccessible
+                          ? `Disponível: ${exercicio.titulo}`
+                          : `Bloqueado: Complete o exercício atual primeiro`
+                      }
+                    />
+                    <span className={`text-xs ${
+                      isCurrent ? 'text-blue-600 font-medium' 
+                      : isCompleted ? 'text-green-600' 
+                      : 'text-gray-400'
+                    }`}>
+                      {index + 1}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={nextExercicio}
+              disabled={!canGoNext() || !hasNext}
+              className={`flex items-center gap-2 px-4 py-2 transition-all duration-200 rounded-lg ${
+                canGoNext() && hasNext
+                  ? 'text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 shadow-sm'
+                  : 'text-gray-400 cursor-not-allowed'
+              }`}
+              title={
+                !canGoNext() 
+                  ? 'Complete este exercício primeiro'
+                  : !hasNext
+                  ? 'Último exercício da lição'
+                  : 'Avançar para o próximo exercício'
+              }
+            >
+              <span>Próximo</span>
+              <ChevronRight size={20} />
+            </button>
+          </div>
+          
+          {/* Status visual adicional */}
+          <div className="mt-3 pt-3 border-t border-gray-100 text-center">
+            <p className="text-xs text-gray-500">
+              {getProgressPercentage() === 100 
+                ? '🎉 Todos os exercícios completados!'
+                : `${Math.round(getProgressPercentage())}% concluído • ${progressHook.exerciciosProgress.filter(p => p.completed).length} de ${exerciciosLicao.length} exercícios`
+              }
+            </p>
+          </div>
         </div>
       </div>
+
+      {/* Notificação de exercício concluído */}
+      {showExercicioCompleted && (
+        <div className="fixed top-20 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-40 animate-bounce">
+          <p className="text-sm font-medium">
+            ✅ Exercício concluído! Use a navegação para continuar.
+          </p>
+        </div>
+      )}
 
       {/* Modal de conclusão */}
       {showCompletionModal && (

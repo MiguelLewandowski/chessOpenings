@@ -1,148 +1,214 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   BookOpen,
-  Play,
-  Lock,
   CheckCircle,
-  Star,
   Clock,
-  Target,
   Trophy,
   ArrowLeft,
-  Crown
+  Crown,
+  Target,
+  Zap,
+  Lock
 } from 'lucide-react';
 import { useAberturas } from '@/hooks/useAberturas';
 import { useLicoes, type Licao } from '@/hooks/useLicoes';
+import { useExercicios } from '@/hooks/useExercicios';
 import Navbar from '@/components/Navbar';
 
-// Componente para as peças decorativas
-const ChessPiece = ({ piece, className = "", size = 24 }: { piece: string; className?: string; size?: number }) => {
+// Componente para peça de xadrez animada
+const AnimatedChessPiece = ({ 
+  piece = 'pawn', 
+  size = 32,
+  className = "",
+  isAnimating = false 
+}: { 
+  piece?: string; 
+  size?: number;
+  className?: string;
+  isAnimating?: boolean;
+}) => {
   const pieces: { [key: string]: string } = {
-    king: '♔',
-    queen: '♕',
-    rook: '♖',
-    bishop: '♗',
-    knight: '♘',
-    pawn: '♙'
+    king: '♔', queen: '♕', rook: '♖', bishop: '♗', knight: '♘', pawn: '♙'
   };
 
   return (
-    <span 
-      className={`select-none ${className}`} 
-      style={{ fontSize: `${size}px`, lineHeight: '1' }}
-    >
-      {pieces[piece] || '♙'}
-    </span>
+    <div className={`
+      select-none transition-all duration-700 ${isAnimating ? 'animate-bounce' : ''}
+      ${className}
+    `}>
+      <span 
+        className="block text-blue-600 drop-shadow-sm"
+        style={{ 
+          fontSize: `${size}px`, 
+          lineHeight: '1',
+          filter: 'drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3))'
+        }}
+      >
+        {pieces[piece] || pieces.pawn}
+      </span>
+    </div>
   );
 };
 
-// Componente para o nó da lição (casa do xadrez)
-const LicaoNode = ({ 
+// Componente para casa da trilha (lição)
+const TrilhaLicao = ({ 
   licao, 
-  position, 
+  index,
   isUnlocked, 
   isCompleted, 
   isCurrent,
+  isPlayerHere,
+  exerciciosCount,
+  completedExercicios,
   aberturaId 
 }: {
   licao: Licao;
-  position: { x: number; y: number };
+  index: number;
   isUnlocked: boolean;
   isCompleted: boolean;
   isCurrent: boolean;
+  isPlayerHere: boolean;
+  exerciciosCount: number;
+  completedExercicios: number;
   aberturaId: string;
 }) => {
-  const router = useRouter();
   
-  const getNodeStyle = () => {
+  const getCardStyle = () => {
+    const baseStyle = `
+      relative w-full p-6 border-2 rounded-xl transition-all duration-300
+      bg-white shadow-sm hover:shadow-md
+    `;
+    
     if (isCompleted) {
-      return 'bg-green-500 border-green-600 text-white shadow-lg shadow-green-500/25';
+      return baseStyle + ' border-green-500 bg-green-50';
     }
+    
     if (isCurrent) {
-      return 'bg-blue-500 border-blue-600 text-white shadow-lg shadow-blue-500/25 animate-pulse';
+      return baseStyle + ' border-blue-500 bg-blue-50 ring-2 ring-blue-200';
     }
+    
     if (isUnlocked) {
-      return 'bg-white border-gray-300 text-gray-700 hover:border-blue-400 hover:shadow-md';
+      return baseStyle + ' border-gray-200 hover:border-blue-300 cursor-pointer';
     }
-    return 'bg-gray-100 border-gray-200 text-gray-400';
+    
+    return baseStyle + ' border-gray-200 bg-gray-50 opacity-60';
   };
 
   const getIcon = () => {
-    if (isCompleted) return <CheckCircle size={20} />;
-    if (!isUnlocked) return <Lock size={20} />;
-    // Todas as lições são conceituais, usamos BookOpen como padrão
-    return <BookOpen size={20} />;
+    if (isCompleted) return <CheckCircle size={24} className="text-green-600" />;
+    if (isCurrent) return <Target size={24} className="text-blue-600" />;
+    if (isUnlocked) return <BookOpen size={24} className="text-gray-600" />;
+    return <Lock size={24} className="text-gray-400" />;
   };
+
+  const progressPercentage = exerciciosCount > 0 ? (completedExercicios / exerciciosCount) * 100 : 0;
 
   const handleClick = () => {
     if (isUnlocked) {
-      router.push(`/aberturas/${aberturaId}/licao/${licao.id}`);
+      window.location.href = `/aberturas/${aberturaId}/licao/${licao.id}`;
     }
   };
 
   return (
-    <div
-      className="absolute"
-      style={{
-        left: `${position.x}%`,
-        top: `${position.y}px`,
-        transform: 'translate(-50%, -50%)'
-      }}
-    >
-      {/* Linha conectora (se não for a primeira lição) */}
-      {licao.ordem > 1 && (
-        <div 
-          className="absolute bottom-full left-1/2 w-1 bg-gray-300 -translate-x-1/2"
-          style={{ height: '60px' }}
-        />
+    <div className="relative">
+      {/* Linha conectora vertical */}
+      {index > 0 && (
+        <div className="absolute top-0 left-8 w-0.5 h-6 bg-gray-300 transform -translate-y-6 z-10" />
       )}
       
-      {/* Nó da lição */}
+      {/* Card da lição */}
       <div 
         onClick={handleClick}
-        className={`
-          relative w-16 h-16 rounded-xl border-3 transition-all duration-300
-          flex items-center justify-center font-bold text-sm
-          ${getNodeStyle()}
-          ${isUnlocked ? 'hover:scale-110 cursor-pointer' : 'cursor-not-allowed'}
-        `}
+        className={getCardStyle()}
       >
-        {/* Ícone principal */}
-        {getIcon()}
-        
-        {/* Número da lição */}
-        <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-semibold text-gray-600">
-          {licao.ordem}
-        </span>
-        
-        {/* Estrelas de progresso */}
-        {isCompleted && (
-          <div className="absolute -top-2 -right-2 flex">
-            {[...Array(3)].map((_, i) => (
-              <Star 
-                key={i} 
-                size={8} 
-                className="text-yellow-400 fill-current -ml-1" 
-              />
-            ))}
+        <div className="flex items-center gap-4">
+          {/* Ícone e número */}
+          <div className="flex-shrink-0 relative">
+            <div className="w-16 h-16 bg-gray-100 rounded-xl border-2 border-gray-200 flex items-center justify-center">
+              {getIcon()}
+            </div>
+            <div className="absolute -bottom-2 -right-2 bg-white border-2 border-gray-200 rounded-full w-6 h-6 flex items-center justify-center">
+              <span className="text-xs font-bold text-gray-700">
+                {licao.ordem}
+              </span>
+            </div>
+          </div>
+
+          {/* Informações da lição */}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">
+              {licao.titulo}
+            </h3>
+            <div className="flex items-center gap-6 text-sm text-gray-500">
+              <div className="flex items-center gap-1">
+                <Clock size={16} />
+                <span>{licao.estimativaTempo}min</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Trophy size={16} />
+                <span>{licao.pontuacao}pts</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Zap size={16} />
+                <span>{exerciciosCount} exercícios</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Status e progresso */}
+          <div className="flex-shrink-0 text-right">
+            {/* Barra de progresso */}
+            {exerciciosCount > 0 && (
+              <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden mb-2">
+                <div 
+                  className={`h-full transition-all duration-500 rounded-full ${
+                    isCompleted ? 'bg-green-500' : isCurrent ? 'bg-blue-500' : 'bg-gray-400'
+                  }`}
+                  style={{ width: `${progressPercentage}%` }}
+                />
+              </div>
+            )}
+            
+            {/* Status text */}
+            {isCompleted && (
+              <div className="flex items-center gap-1 text-green-600 text-sm font-medium">
+                <CheckCircle size={16} />
+                <span>Completa</span>
+              </div>
+            )}
+            
+            {isCurrent && (
+              <div className="flex items-center gap-1 text-blue-600 text-sm font-medium">
+                <Target size={16} />
+                <span>Atual</span>
+              </div>
+            )}
+
+            {!isUnlocked && (
+              <div className="flex items-center gap-1 text-gray-400 text-sm">
+                <Lock size={16} />
+                <span>Bloqueada</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Peão do jogador */}
+        {isPlayerHere && (
+          <div className="absolute -top-4 left-8 transform -translate-x-1/2 z-20">
+            <AnimatedChessPiece 
+              piece="pawn" 
+              size={40} 
+              isAnimating={true}
+              className="relative z-10"
+            />
           </div>
         )}
       </div>
-      
-      {/* Tooltip com informações */}
-      {isUnlocked && (
-        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-4 opacity-0 hover:opacity-100 transition-opacity duration-200 z-10">
-          <div className="bg-gray-900 text-white px-3 py-2 rounded-lg text-xs whitespace-nowrap">
-            <div className="font-semibold">{licao.titulo}</div>
-            <div className="text-gray-300">{licao.estimativaTempo}min • {licao.pontuacao} pts</div>
-          </div>
-          <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45" />
-        </div>
-      )}
     </div>
   );
 };
@@ -153,105 +219,141 @@ export default function TrilhaLicoes() {
   
   const { aberturas } = useAberturas();
   const { licoes } = useLicoes();
+  const { exercicios } = useExercicios();
   
-  const [currentLicao, setCurrentLicao] = useState(1);
-  const [completedLicoes, setCompletedLicoes] = useState<number[]>([]);
+  const [userProgress, setUserProgress] = useState<{
+    completedLicoes: string[];
+    exerciciosProgress: { [licaoId: string]: number };
+    currentLicaoIndex: number;
+  }>({
+    completedLicoes: [],
+    exerciciosProgress: {},
+    currentLicaoIndex: 0
+  });
+
+  const [playerPosition, setPlayerPosition] = useState(0);
 
   const abertura = aberturas.find(a => a.id === aberturaId);
+  
+  // Corrigir ordenação das lições
   const licoesAbertura = licoes
     .filter(l => l.aberturaId === aberturaId && l.status === 'Ativo')
-    .sort((a, b) => a.ordem - b.ordem);
+    .sort((a, b) => a.ordem - b.ordem); // Ordenação correta por número da ordem
 
-  // Simular progresso do usuário (em produção, viria de uma API)
+  // Simular carregamento do progresso do usuário
   useEffect(() => {
-    // Simular algumas lições completas
-    setCompletedLicoes([1, 2]);
-    setCurrentLicao(3);
+    // Em produção, isso viria de uma API
+    const mockProgress = {
+      completedLicoes: [], // Nenhuma lição completada inicialmente
+      exerciciosProgress: {}, // Nenhum exercício completado inicialmente
+      currentLicaoIndex: 0
+    };
+    setUserProgress(mockProgress);
+    setPlayerPosition(0);
   }, []);
 
-  // Gerar posições das lições em zigue-zague
-  const getLicaoPositions = () => {
-    return licoesAbertura.map((licao, index) => {
-      const row = Math.floor(index / 2);
-      const isEven = index % 2 === 0;
-      
-      return {
-        x: isEven ? 20 : 80, // Alternar entre esquerda e direita
-        y: 150 + (row * 120) // Espaçamento vertical
-      };
-    });
+  // Simular progresso quando uma lição é completada
+  const handleLicaoComplete = (licaoIndex: number) => {
+    const nextIndex = Math.min(licaoIndex + 1, licoesAbertura.length - 1);
+    setUserProgress(prev => ({
+      ...prev,
+      currentLicaoIndex: nextIndex,
+      completedLicoes: [...prev.completedLicoes, licoesAbertura[licaoIndex].id]
+    }));
+    setPlayerPosition(nextIndex);
   };
 
-  const positions = getLicaoPositions();
+  // Calcular lição atual (primeira não completada)
+  const getCurrentLicaoIndex = () => {
+    const nextLicaoIndex = licoesAbertura.findIndex(licao => 
+      !userProgress.completedLicoes.includes(licao.id)
+    );
+    return nextLicaoIndex >= 0 ? nextLicaoIndex : licoesAbertura.length;
+  };
+
+  const currentLicaoIndex = getCurrentLicaoIndex();
 
   const getTotalPontos = () => {
-    return completedLicoes.reduce((total, ordem) => {
-      const licao = licoesAbertura.find(l => l.ordem === ordem);
+    return userProgress.completedLicoes.reduce((total, licaoId) => {
+      const licao = licoesAbertura.find(l => l.id === licaoId);
       return total + (licao?.pontuacao || 0);
     }, 0);
   };
 
   const getTotalTempo = () => {
-    return completedLicoes.reduce((total, ordem) => {
-      const licao = licoesAbertura.find(l => l.ordem === ordem);
+    return userProgress.completedLicoes.reduce((total, licaoId) => {
+      const licao = licoesAbertura.find(l => l.id === licaoId);
       return total + (licao?.estimativaTempo || 0);
     }, 0);
   };
 
-  const router = useRouter();
-
   if (!abertura) {
-    return <div>Abertura não encontrada</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Abertura não encontrada</h2>
+          <Link href="/aberturas" className="text-blue-600 hover:text-blue-800">
+            Voltar para Aberturas
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200 sticky top-16 z-30">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-            <div className="flex items-center gap-4 min-w-0 flex-1">
+      {/* Header limpo */}
+      <div className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
               <Link 
                 href="/aberturas"
-                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors flex-shrink-0 cursor-pointer"
+                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
               >
                 <ArrowLeft size={20} />
               </Link>
-              <div className="min-w-0 flex-1">
-                <h1 className="font-title text-xl font-bold text-gray-900 truncate">
-                  {abertura.nome}
-                </h1>
-                <p className="font-body text-sm text-gray-600 truncate">
-                  {licoesAbertura.length} lições • {abertura.categoria}
-                </p>
+              
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
+                  <Crown size={24} className="text-white" />
+                </div>
+                <div>
+                  <h1 className="font-title text-2xl font-bold text-gray-900">
+                    {abertura.nome}
+                  </h1>
+                  <p className="font-body text-gray-600">
+                    {licoesAbertura.length} lições • {abertura.categoria}
+                  </p>
+                </div>
               </div>
             </div>
             
-            {/* Progresso */}
-            <div className="flex items-center gap-3 lg:gap-6 flex-wrap lg:flex-nowrap">
+            {/* Estatísticas limpas */}
+            <div className="hidden lg:flex items-center gap-6">
               <div className="text-center">
-                <div className="flex items-center gap-1 text-yellow-500 mb-1">
-                  <Trophy size={16} />
-                  <span className="font-title text-sm font-bold">{getTotalPontos()}</span>
+                <div className="flex items-center gap-1 text-blue-600 mb-1">
+                  <Trophy size={18} />
+                  <span className="font-title text-lg font-bold">{getTotalPontos()}</span>
                 </div>
                 <p className="font-body text-xs text-gray-600">Pontos</p>
               </div>
               
               <div className="text-center">
-                <div className="flex items-center gap-1 text-blue-500 mb-1">
-                  <Clock size={16} />
-                  <span className="font-title text-sm font-bold">{getTotalTempo()}min</span>
+                <div className="flex items-center gap-1 text-gray-600 mb-1">
+                  <Clock size={18} />
+                  <span className="font-title text-lg font-bold">{getTotalTempo()}min</span>
                 </div>
                 <p className="font-body text-xs text-gray-600">Estudado</p>
               </div>
               
               <div className="text-center">
-                <div className="flex items-center gap-1 text-green-500 mb-1">
-                  <CheckCircle size={16} />
-                  <span className="font-title text-sm font-bold">
-                    {completedLicoes.length}/{licoesAbertura.length}
+                <div className="flex items-center gap-1 text-green-600 mb-1">
+                  <CheckCircle size={18} />
+                  <span className="font-title text-lg font-bold">
+                    {userProgress.completedLicoes.length}/{licoesAbertura.length}
                   </span>
                 </div>
                 <p className="font-body text-xs text-gray-600">Completas</p>
@@ -259,147 +361,102 @@ export default function TrilhaLicoes() {
             </div>
           </div>
           
-          {/* Barra de progresso */}
-          <div className="mt-4 w-full">
-            <div className="bg-gray-200 rounded-full h-2 w-full max-w-full overflow-hidden">
+          {/* Barra de progresso simples */}
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-gray-700">Progresso da Trilha</span>
+              <span className="text-sm text-gray-600">
+                {Math.round((userProgress.completedLicoes.length / licoesAbertura.length) * 100)}%
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
               <div 
-                className="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${Math.min(100, (completedLicoes.length / licoesAbertura.length) * 100)}%` }}
+                className="bg-blue-600 h-2 rounded-full transition-all duration-700"
+                style={{ width: `${(userProgress.completedLicoes.length / licoesAbertura.length) * 100}%` }}
               />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Trilha de Lições */}
-      <div className="relative max-w-4xl mx-auto px-4 py-8 overflow-hidden">
-        {/* Elementos decorativos de xadrez */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {/* Peças decorativas esquerda */}
-          <div className="absolute left-4 top-20 hidden sm:block">
-            <ChessPiece piece="king" className="text-gray-200" size={32} />
-          </div>
-          <div className="absolute left-8 top-80 hidden sm:block">
-            <ChessPiece piece="queen" className="text-gray-200" size={28} />
-          </div>
-          <div className="absolute left-2 top-96 hidden sm:block">
-            <ChessPiece piece="rook" className="text-gray-200" size={24} />
-          </div>
-          
-          {/* Peças decorativas direita */}
-          <div className="absolute right-4 top-40 hidden sm:block">
-            <ChessPiece piece="bishop" className="text-gray-200" size={28} />
-          </div>
-          <div className="absolute right-8 top-72 hidden sm:block">
-            <ChessPiece piece="knight" className="text-gray-200" size={32} />
-          </div>
-          <div className="absolute right-2 top-[500px] hidden sm:block">
-            <ChessPiece piece="pawn" className="text-gray-200" size={20} />
-          </div>
-          
-          {/* Padrão de casas de xadrez sutil */}
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 opacity-5 hidden lg:block">
-            <div className="grid grid-cols-8 gap-0">
-              {[...Array(64)].map((_, i) => (
-                <div 
-                  key={i}
-                  className={`w-6 h-6 ${
-                    (Math.floor(i / 8) + i % 8) % 2 === 0 
-                      ? 'bg-gray-900' 
-                      : 'bg-gray-300'
-                  }`} 
-                />
-              ))}
-            </div>
-          </div>
+      {/* Trilha vertical simples */}
+      <div className="max-w-2xl mx-auto px-4 py-12">
+        <div className="text-center mb-8">
+          <h2 className="font-title text-xl font-bold text-gray-900 mb-2">
+            Trilha de Lições
+          </h2>
+          <p className="font-body text-gray-600">
+            Complete as lições em sequência para dominar a {abertura.nome}
+          </p>
         </div>
 
-        {/* Trilha principal */}
-        <div className="relative" style={{ minHeight: `${Math.max(600, positions.length * 60 + 200)}px` }}>
-          {/* Linha de progresso principal */}
-          <div className="absolute left-1/2 top-0 w-1 bg-gray-200 transform -translate-x-1/2"
-               style={{ height: '100%' }} />
-          
-          {/* Início da trilha */}
-          <div className="absolute left-1/2 top-8 transform -translate-x-1/2 text-center">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
-              <Crown size={32} />
-            </div>
-            <p className="font-title text-sm font-bold text-gray-700 mt-2">INÍCIO</p>
-          </div>
+        {/* Lista de lições */}
+        <div className="space-y-4">
+          {licoesAbertura.map((licao, index) => {
+            const licaoExercicios = exercicios.filter(e => e.licaoId === licao.id && e.status === 'Ativo');
+            const completedExercicios = userProgress.exerciciosProgress[licao.id] || 0;
+            
+            return (
+              <TrilhaLicao
+                key={licao.id}
+                licao={licao}
+                index={index}
+                isUnlocked={index <= currentLicaoIndex}
+                isCompleted={userProgress.completedLicoes.includes(licao.id)}
+                isCurrent={index === currentLicaoIndex}
+                isPlayerHere={index === playerPosition}
+                exerciciosCount={licaoExercicios.length}
+                completedExercicios={completedExercicios}
+                aberturaId={aberturaId}
+              />
+            );
+          })}
+        </div>
 
-          {/* Nós das lições */}
-          {licoesAbertura.map((licao, index) => (
-            <LicaoNode
-              key={licao.id}
-              licao={licao}
-              position={positions[index]}
-              isUnlocked={licao.ordem <= currentLicao}
-              isCompleted={completedLicoes.includes(licao.ordem)}
-              isCurrent={licao.ordem === currentLicao}
-              aberturaId={aberturaId}
-            />
-          ))}
-          
-          {/* Final da trilha */}
-          <div 
-            className="absolute left-1/2 transform -translate-x-1/2 text-center"
-            style={{ top: `${Math.max(positions[positions.length - 1]?.y + 100, 700)}px` }}
-          >
-            <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
-              <Trophy size={32} />
+        {/* Finish line simples */}
+        {userProgress.completedLicoes.length === licoesAbertura.length && (
+          <div className="mt-8 text-center p-6 bg-green-50 border-2 border-green-200 rounded-xl">
+            <div className="w-16 h-16 bg-green-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <Trophy size={32} className="text-white" />
             </div>
-            <p className="font-title text-sm font-bold text-gray-700 mt-2">MAESTRIA</p>
+            <h3 className="font-title text-lg font-bold text-gray-900 mb-2">
+              Parabéns! Trilha Completa
+            </h3>
+            <p className="font-body text-gray-600">
+              Você dominou a {abertura.nome}!
+            </p>
           </div>
+        )}
+
+        {/* Controles de teste (remover em produção) */}
+        <div className="mt-8 text-center bg-white p-4 rounded-lg border border-gray-200">
+          <p className="text-sm text-gray-600 mb-3">Controles de teste:</p>
+          <button 
+            onClick={() => {
+              if (currentLicaoIndex < licoesAbertura.length) {
+                handleLicaoComplete(currentLicaoIndex);
+              }
+            }}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors mr-3 text-sm"
+            disabled={currentLicaoIndex >= licoesAbertura.length}
+          >
+            Completar Lição Atual
+          </button>
+          <button 
+            onClick={() => {
+              setUserProgress({
+                completedLicoes: [],
+                exerciciosProgress: {},
+                currentLicaoIndex: 0
+              });
+              setPlayerPosition(0);
+            }}
+            className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors text-sm"
+          >
+            Reset Progresso
+          </button>
         </div>
       </div>
-
-      {/* Painel de informações da lição atual */}
-      {currentLicao <= licoesAbertura.length && (
-        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40 px-4 w-full max-w-sm">
-          <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 mx-auto">
-            {(() => {
-              const licao = licoesAbertura.find(l => l.ordem === currentLicao);
-              if (!licao) return null;
-              
-              return (
-                <>
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <BookOpen className="text-blue-600" size={20} />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-title text-lg font-bold text-gray-900 truncate">
-                        {licao.titulo}
-                      </h3>
-                      <p className="font-body text-sm text-gray-600 truncate">
-                        Lição {licao.ordem} • {licao.estimativaTempo}min
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <p className="font-body text-sm text-gray-600 mb-4 line-clamp-3">
-                    {licao.descricao}
-                  </p>
-                  
-                  <div className="flex gap-3">
-                    <button 
-                      onClick={() => router.push(`/aberturas/${aberturaId}/licao/${licao.id}`)}
-                      className="flex-1 bg-blue-600 text-white px-4 py-3 rounded-xl font-interface font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 min-w-0 cursor-pointer"
-                    >
-                      <Play size={16} className="flex-shrink-0" />
-                      <span className="truncate">Iniciar Lição</span>
-                    </button>
-                    <button className="p-3 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors flex-shrink-0 cursor-pointer">
-                      <Target size={16} />
-                    </button>
-                  </div>
-                </>
-              );
-            })()}
-          </div>
-        </div>
-      )}
     </div>
   );
 } 
