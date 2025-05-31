@@ -255,7 +255,7 @@ export default function AberturaForm({
                         ...prev, 
                         categoria: e.target.value as AberturaFormData['categoria']
                       }))}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white cursor-pointer"
                     >
                       <option value="Tática">Tática</option>
                       <option value="Posicional">Posicional</option>
@@ -273,7 +273,7 @@ export default function AberturaForm({
                         ...prev, 
                         dificuldade: e.target.value as AberturaFormData['dificuldade']
                       }))}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white cursor-pointer"
                     >
                       <option value="Iniciante">Iniciante</option>
                       <option value="Intermediário">Intermediário</option>
@@ -374,12 +374,12 @@ export default function AberturaForm({
                     value={formData.status}
                     onChange={(e) => setFormData(prev => ({ 
                       ...prev, 
-                      status: e.target.value as AberturaFormData['status']
+                      status: e.target.value as 'Ativo' | 'Rascunho' | 'Arquivado' 
                     }))}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg font-body focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white cursor-pointer"
                   >
-                    <option value="Rascunho">Rascunho</option>
                     <option value="Ativo">Ativo</option>
+                    <option value="Rascunho">Rascunho</option>
                     <option value="Arquivado">Arquivado</option>
                   </select>
                 </div>
