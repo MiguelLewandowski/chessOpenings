@@ -25,7 +25,7 @@ export default function ExercicioQuizPlayer({
   const opcoes = exercicio.conteudo.opcoes || [];
   const opcaoCorreta = opcoes.find(op => op.correta);
 
-  // 🎯 CORREÇÃO: Reset completo quando o exercício muda
+  // CORREÇÃO: Reset completo quando o exercício muda
   useEffect(() => {
     console.log('🔄 Exercício mudou - resetando ExercicioQuizPlayer:', exercicio.id);
     
@@ -92,7 +92,7 @@ export default function ExercicioQuizPlayer({
     setTimeout(() => {
       const timeSpent = Math.floor((Date.now() - startTime) / 1000);
       onComplete(finalScore, timeSpent);
-    }, 800); // 🎯 REDUZIDO: de 3000ms para 800ms para transição mais rápida
+    }, 800); // REDUZIDO: de 3000ms para 800ms para transição mais rápida
   };
 
   const formatTime = (seconds: number) => {

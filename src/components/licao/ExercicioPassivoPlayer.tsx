@@ -22,7 +22,7 @@ export default function ExercicioPassivoPlayer({
 
   const movimentos = exercicio.conteudo.sequenciaMovimentos || [];
 
-  // 🎯 CORREÇÃO: Reset completo quando o exercício muda
+  // CORREÇÃO: Reset completo quando o exercício muda
   useEffect(() => {
     console.log('🔄 Exercício mudou - resetando ExercicioPassivoPlayer:', exercicio.id);
     
@@ -83,7 +83,7 @@ export default function ExercicioPassivoPlayer({
     if (isPlaying && !isCompleted) {
       const timer = setTimeout(() => {
         goToNextMove();
-      }, 1200); // 🎯 REDUZIDO: de 2000ms para 1200ms para reprodução mais fluida
+      }, 1200); // REDUZIDO: de 2000ms para 1200ms para reprodução mais fluida
 
       return () => clearTimeout(timer);
     }

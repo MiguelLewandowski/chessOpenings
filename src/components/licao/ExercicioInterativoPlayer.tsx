@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { CheckCircle, XCircle, Lightbulb, RotateCcw, Clock } from 'lucide-react';
+import { CheckCircle, XCircle, Lightbulb, RotateCcw, Clock, Trophy } from 'lucide-react';
 import { Chessboard } from 'react-chessboard';
 import { Chess } from 'chess.js';
 import { type Exercicio } from '@/types/exercicios';
@@ -27,7 +27,7 @@ export default function ExercicioInterativoPlayer({
   const maxAttempts = exercicio.tentativasMaximas || 3;
   const movimentoCorreto = exercicio.conteudo.movimentoCorreto;
 
-  // 🎯 CORREÇÃO: Reset completo quando o exercício muda
+  // CORREÇÃO: Reset completo quando o exercício muda
   useEffect(() => {
     console.log('🔄 Exercício mudou - resetando ExercicioInterativoPlayer:', exercicio.id);
     
@@ -288,7 +288,11 @@ export default function ExercicioInterativoPlayer({
             ) : (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center min-h-[200px] flex items-center justify-center">
                 <div>
-                  <div className="text-3xl mb-3">🎯</div>
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Trophy className="w-8 h-8 text-blue-600" />
+                    </div>
+                  </div>
                   <p className="text-blue-700 font-medium mb-1 text-sm">
                     Encontre o melhor movimento!
                   </p>
