@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Trophy, Loader2 } from 'lucide-react';
 import { useAberturas } from '@/hooks/useAberturas';
 import { useLicoes } from '@/hooks/useLicoes';
 import { useExercicios } from '@/hooks/useExercicios';
 import { useLicaoProgress } from '@/hooks/useLicaoProgress';
+import { useUserProgress } from '@/hooks/useUserProgress';
 import ExercicioPassivoPlayer from '@/components/licao/ExercicioPassivoPlayer';
 import ExercicioInterativoPlayer from '@/components/licao/ExercicioInterativoPlayer';
 import ExercicioQuizPlayer from '@/components/licao/ExercicioQuizPlayer';
@@ -17,63 +18,85 @@ export default function LicaoPage() {
   const aberturaId = params.id as string;
   const licaoId = params.licaoId as string;
 
-  const { aberturas } = useAberturas();
-  const { licoes } = useLicoes();
-  const { exercicios } = useExercicios();
+  const { aberturas, loading: aberturasLoading } = useAberturas();
+  const { licoes, loading: licoesLoading } = useLicoes();
+  const { exercicios, loading: exerciciosLoading } = useExercicios();
+
+  const {
+    initializeLicao,
+    updateLicaoProgress,
+    completeLicao
+  } = useUserProgress();
 
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [showExercicioCompleted, setShowExercicioCompleted] = useState(false);
+  
+  const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
 
-  // Buscar dados
+  useEffect(() => {
+    if (!aberturasLoading && !licoesLoading && !exerciciosLoading) {
+      setHasAttemptedLoad(true);
+    }
+  }, [aberturasLoading, licoesLoading, exerciciosLoading]);
+
   const abertura = aberturas.find(a => a.id === aberturaId);
   const licao = licoes.find(l => l.id === licaoId);
   const exerciciosLicao = exercicios
     .filter(e => e.licaoId === licaoId && e.status === 'Ativo')
     .sort((a, b) => a.ordem - b.ordem);
 
-  // Buscar todas as lições desta abertura para navegação
   const licoesAbertura = licoes
     .filter(l => l.aberturaId === aberturaId && l.status === 'Ativo')
     .sort((a, b) => a.ordem - b.ordem);
 
-  // Identificar próxima lição
   const licaoAtualIndex = licoesAbertura.findIndex(l => l.id === licaoId);
   const proximaLicao = licaoAtualIndex < licoesAbertura.length - 1 
     ? licoesAbertura[licaoAtualIndex + 1] 
     : null;
 
-  // Hook de progresso
+  useEffect(() => {
+    if (licaoId && exerciciosLicao.length > 0) {
+      initializeLicao(licaoId, exerciciosLicao);
+    }
+  }, [licaoId, exerciciosLicao, initializeLicao]);
+
   const progressHook = useLicaoProgress(exerciciosLicao);
   
   const {
     currentExercicioIndex,
     getCurrentExercicio,
-    completeCurrentExercicio,
+    completeCurrentExercicio: completeLocalExercicio,
     nextExercicio,
     prevExercicio,
     goToExercicio,
     canGoNext,
     getProgressPercentage,
-    isCompleted,
+    isCompleted: isLocalCompleted,
     hasNext,
     hasPrev,
-    totalScore,
-    totalTime
+    totalScore: localTotalScore,
+    totalTime: localTotalTime,
+    exerciciosProgress: localExerciciosProgress
   } = progressHook;
 
   const currentExercicio = getCurrentExercicio();
 
-  // Verificar se a lição foi completada
   useEffect(() => {
-    if (isCompleted) {
+    if (licaoId && localExerciciosProgress.length > 0) {
+      updateLicaoProgress(licaoId, localExerciciosProgress, localTotalScore, localTotalTime);
+    }
+  }, [licaoId, localExerciciosProgress, localTotalScore, localTotalTime, updateLicaoProgress]);
+
+  useEffect(() => {
+    if (isLocalCompleted && licaoId && aberturaId) {
+      completeLicao(licaoId, aberturaId, licaoAtualIndex);
       setShowCompletionModal(true);
     }
-  }, [isCompleted]);
+  }, [isLocalCompleted, licaoId, aberturaId, licaoAtualIndex, completeLicao]);
 
   const handleExercicioComplete = (score: number, timeSpent: number) => {
-    completeCurrentExercicio(score, timeSpent);
+    completeLocalExercicio(score, timeSpent);
     
-    // Mostrar notificação discreta
     setShowExercicioCompleted(true);
     setTimeout(() => setShowExercicioCompleted(false), 2000);
   };
@@ -88,6 +111,26 @@ export default function LicaoPage() {
     }
   };
 
+  const isLoading = aberturasLoading || licoesLoading || exerciciosLoading || !hasAttemptedLoad;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+            <Loader2 size={32} className="text-blue-600 animate-spin" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            Carregando lição...
+          </h2>
+          <p className="text-gray-600">
+            Preparando os exercícios para você
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (!abertura || !licao || !currentExercicio) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -95,9 +138,12 @@ export default function LicaoPage() {
           <h2 className="text-xl font-bold text-gray-900 mb-2">
             Lição não encontrada
           </h2>
+          <p className="text-gray-600 mb-4">
+            A lição que você está procurando não existe ou foi removida.
+          </p>
           <button 
             onClick={handleBackToTrilha}
-            className="text-blue-600 hover:text-blue-800"
+            className="text-blue-600 hover:text-blue-800 font-medium"
           >
             Voltar à trilha
           </button>
@@ -136,11 +182,9 @@ export default function LicaoPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
-      {/* Header minimalista */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            {/* Navegação */}
             <div className="flex items-center gap-4">
               <button
                 onClick={handleBackToTrilha}
@@ -159,7 +203,6 @@ export default function LicaoPage() {
               </div>
             </div>
 
-            {/* Progresso */}
             <div className="flex items-center gap-6">
               <div className="text-right text-sm">
                 <div className="font-bold text-gray-900">
@@ -181,9 +224,7 @@ export default function LicaoPage() {
         </div>
       </div>
 
-      {/* Conteúdo principal */}
       <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Título do exercício */}
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             {currentExercicio.titulo}
@@ -193,12 +234,10 @@ export default function LicaoPage() {
           </p>
         </div>
 
-        {/* Exercício */}
         <div className="mb-8">
           {renderExercicio()}
         </div>
 
-        {/* Navegação entre exercícios */}
         <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 max-w-2xl mx-auto">
           <div className="text-center mb-3">
             <p className="text-sm text-gray-600 font-medium">
@@ -283,11 +322,10 @@ export default function LicaoPage() {
             </button>
           </div>
           
-          {/* Status visual adicional */}
           <div className="mt-3 pt-3 border-t border-gray-100 text-center">
             <p className="text-xs text-gray-500">
               {getProgressPercentage() === 100 
-                ? '🎉 Todos os exercícios completados!'
+                ? 'Todos os exercícios completados!'
                 : `${Math.round(getProgressPercentage())}% concluído • ${progressHook.exerciciosProgress.filter(p => p.completed).length} de ${exerciciosLicao.length} exercícios`
               }
             </p>
@@ -295,7 +333,6 @@ export default function LicaoPage() {
         </div>
       </div>
 
-      {/* Notificação de exercício concluído */}
       {showExercicioCompleted && (
         <div className="fixed top-20 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-40 animate-bounce">
           <p className="text-sm font-medium">
@@ -304,7 +341,6 @@ export default function LicaoPage() {
         </div>
       )}
 
-      {/* Modal de conclusão */}
       {showCompletionModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-auto text-center">
@@ -312,36 +348,35 @@ export default function LicaoPage() {
               <Trophy className="text-green-600" size={32} />
             </div>
             
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Parabéns! 🎉
+            <h2 className="text-2xl font-bold text-green-800 mb-2">
+              Parabéns!
             </h2>
             
             {proximaLicao ? (
-              // Há mais lições
               <>
                 <p className="text-gray-600 mb-6">
-                  Você completou a lição &quot;{licao.titulo}&quot; com sucesso!
+                  Você completou a lição &quot;{licao.titulo}&quot; com sucesso! A próxima lição já foi desbloqueada.
                 </p>
 
                 <div className="bg-gray-50 rounded-lg p-4 mb-6">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <div className="font-bold text-gray-900">{totalScore}</div>
+                      <div className="font-bold text-gray-900">{localTotalScore}</div>
                       <div className="text-gray-600">Pontos</div>
                     </div>
                     <div>
-                      <div className="font-bold text-gray-900">{Math.floor(totalTime / 60)}m {totalTime % 60}s</div>
+                      <div className="font-bold text-gray-900">{Math.floor(localTotalTime / 60)}m {localTotalTime % 60}s</div>
                       <div className="text-gray-600">Tempo</div>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-3">
+                <div className="space-y-3">
                   <button
                     onClick={handleProximaLicao}
                     className="w-full bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
                   >
-                    Próxima Lição
+                    Próxima Lição: {proximaLicao.titulo}
                   </button>
                   
                   <button
@@ -353,7 +388,6 @@ export default function LicaoPage() {
                 </div>
               </>
             ) : (
-              // Não há mais lições - completou toda a abertura
               <>
                 <p className="text-gray-600 mb-6">
                   Você finalizou todas as lições da abertura <strong>{abertura.nome}</strong>!
@@ -366,11 +400,11 @@ export default function LicaoPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <div className="font-bold text-gray-900">{totalScore}</div>
+                      <div className="font-bold text-gray-900">{localTotalScore}</div>
                       <div className="text-gray-600">Pontos Finais</div>
                     </div>
                     <div>
-                      <div className="font-bold text-gray-900">{Math.floor(totalTime / 60)}m {totalTime % 60}s</div>
+                      <div className="font-bold text-gray-900">{Math.floor(localTotalTime / 60)}m {localTotalTime % 60}s</div>
                       <div className="text-gray-600">Tempo Total</div>
                     </div>
                   </div>
@@ -380,7 +414,7 @@ export default function LicaoPage() {
                   onClick={handleBackToTrilha}
                   className="w-full bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
                 >
-                  Voltar para a Trilha
+                  Ver Trilha Completa
                 </button>
               </>
             )}
