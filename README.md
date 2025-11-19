@@ -24,12 +24,40 @@ Uma plataforma educacional de xadrez inspirada no Duolingo, que utiliza gamifica
 
 ---
 
-## 🚀 **Tecnologias**
+## �️ **Backend**
 
-- **Next.js 14** com TypeScript
-- **Zustand** (estado global)
-- **TailwindCSS** (estilização)
-- **Chess.js** (validação de xadrez)
+- **Banco**: PostgreSQL com **Prisma ORM**
+- **API**: Rotas do App Router (`src/app/api/*`)
+- **Seeders**: `prisma/seed.ts`
+- **Docker**: `docker-compose.yml` com serviços `db` e `web`
+
+### **Modelos**
+- `Abertura`, `Licao`, `Exercicio` com relações e `onDelete: Cascade`
+- Progresso: `AberturaProgress`, `LicaoProgress` e `User` padrão `default`
+
+### **Endpoints**
+- `GET/POST /api/aberturas`
+- `GET/PUT/DELETE /api/aberturas/:id`
+- `GET/POST /api/licoes` (`?aberturaId=` opcional)
+- `GET/PUT/DELETE /api/licoes/:id`
+- `GET/POST /api/exercicios` (`?licaoId=` opcional)
+- `GET/PUT/DELETE /api/exercicios/:id`
+- `POST /api/progress/aberturas`, `DELETE /api/progress/aberturas?aberturaId=`
+- `POST /api/progress/licoes`, `DELETE /api/progress/licoes?licaoId=`
+
+### **Migração de Persistência**
+- Hooks `useAberturas`, `useLicoes`, `useExercicios` agora consomem a API.
+- `useUserProgress` mantém estado local para UX e sincroniza progresso com a API.
+
+---
+
+## � **Tecnologias**
+
+- **Next.js 15** com TypeScript (App Router em `src/app`)
+- **React 19** e **React DOM 19**
+- **Zustand** (estado global com persistência)
+- **TailwindCSS 4** (estilização)
+- **Chess.js** (validação de regras)
 - **React Chessboard** (tabuleiro interativo)
 - **Lucide React** (ícones)
 
@@ -43,9 +71,49 @@ git clone <repository-url>
 cd chess-openings
 npm install
 
-# Execute em desenvolvimento
+# Desenvolvimento
 npm run dev
+
+# Produção
+npm run build
+npm run start
 ```
+
+### **Com Docker**
+
+```bash
+cp .env.example .env
+docker-compose up --build
+```
+
+App: `http://localhost:3000` • Banco: `localhost:5432` (usuário `postgres`, senha `postgres`, db `chessopenings`).
+
+### **Banco e Prisma**
+
+```bash
+# Gerar client
+npm run prisma:generate
+# Migrações em dev
+npm run db:migrate
+# Aplicar migrações em prod
+npm run db:deploy
+# Seed
+npm run db:seed
+```
+
+Conteúdo seedado: 15 lições × 5 exercícios para a Abertura Italiana, com FEN derivada via `chess.js`.
+
+### FEN e Exercícios
+- Passivos: usam `posicaoInicial` em FEN e sequência de lances SAN; ao reproduzir, o cliente deriva a FEN de cada passo quando ausente.
+- Interativos: `posicaoInicial` em FEN e `movimentoCorreto` em SAN; validação e atualização do tabuleiro por `chess.js`.
+- Quiz: `posicaoInicial` em FEN, opções SAN e preview do lance selecionado com `chess.js`.
+
+#### **Windows – Falhas ao baixar engines do Prisma**
+- Se ocorrer erro 500 ao baixar binários (instabilidade do CDN), use:
+  - PowerShell: `setx PRISMA_CLIENT_ENGINE_TYPE binary` e reinicie o terminal
+  - Git Bash: `export PRISMA_CLIENT_ENGINE_TYPE=binary`
+- O projeto já força `binary` no script (`npm run prisma:generate`).
+- Alternativa: `docker-compose up --build` gera client, aplica schema e faz seed dentro do container.
 
 ### **Acesso às Interfaces**
 
