@@ -18,6 +18,7 @@ export default function Navbar() {
 
   const navigation = [
     { name: 'Início', href: '/', icon: BookOpen },
+    { name: 'Quiz de Estilo', href: '/quiz', icon: Target },
     { name: 'Aberturas', href: '/aberturas', icon: Target },
     { name: 'Lições', href: '/licoes', icon: Trophy },
     { name: 'Exercícios', href: '/exercicios', icon: User }

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Play, Pause, RotateCcw, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Chessboard } from 'react-chessboard';
+import { Chess } from 'chess.js';
 import { type Exercicio } from '@/types/exercicios';
 
 interface ExercicioPassivoPlayerProps {
@@ -47,7 +48,22 @@ export default function ExercicioPassivoPlayer({
     if (currentMoveIndex < movimentos.length - 1) {
       const nextIndex = currentMoveIndex + 1;
       setCurrentMoveIndex(nextIndex);
-      setBoardPosition(movimentos[nextIndex].posicaoFEN);
+      const fenFromData = movimentos[nextIndex]?.posicaoFEN;
+      if (fenFromData && fenFromData.trim().length > 0) {
+        setBoardPosition(fenFromData);
+      } else {
+        const game = new Chess();
+        try {
+          game.load(exercicio.conteudo.posicaoInicial);
+        } catch {}
+        for (let i = 0; i <= nextIndex; i++) {
+          const san = movimentos[i]?.movimento;
+          if (san) {
+            try { game.move(san); } catch {}
+          }
+        }
+        setBoardPosition(game.fen());
+      }
       
       // Se chegou no último movimento, marcar como concluído
       if (nextIndex === movimentos.length - 1) {
@@ -61,7 +77,22 @@ export default function ExercicioPassivoPlayer({
     if (currentMoveIndex > 0) {
       const prevIndex = currentMoveIndex - 1;
       setCurrentMoveIndex(prevIndex);
-      setBoardPosition(movimentos[prevIndex].posicaoFEN);
+      const fenFromData = movimentos[prevIndex]?.posicaoFEN;
+      if (fenFromData && fenFromData.trim().length > 0) {
+        setBoardPosition(fenFromData);
+      } else {
+        const game = new Chess();
+        try {
+          game.load(exercicio.conteudo.posicaoInicial);
+        } catch {}
+        for (let i = 0; i <= prevIndex; i++) {
+          const san = movimentos[i]?.movimento;
+          if (san) {
+            try { game.move(san); } catch {}
+          }
+        }
+        setBoardPosition(game.fen());
+      }
     } else if (currentMoveIndex === 0) {
       setCurrentMoveIndex(-1);
       setBoardPosition(exercicio.conteudo.posicaoInicial);

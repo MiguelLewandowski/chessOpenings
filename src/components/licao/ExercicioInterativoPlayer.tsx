@@ -23,6 +23,9 @@ export default function ExercicioInterativoPlayer({
   const [showHint, setShowHint] = useState(false);
   const [timeLeft, setTimeLeft] = useState(exercicio.tempoLimite || 0);
   const [startTime, setStartTime] = useState(Date.now());
+  const [wrongMoveSan, setWrongMoveSan] = useState<string | null>(null);
+  const [compareCorrectFen, setCompareCorrectFen] = useState<string | null>(null);
+  const [compareWrongFen, setCompareWrongFen] = useState<string | null>(null);
 
   const maxAttempts = exercicio.tentativasMaximas || 3;
   const movimentoCorreto = exercicio.conteudo.movimentoCorreto;
@@ -43,6 +46,9 @@ export default function ExercicioInterativoPlayer({
     setShowHint(false);
     setTimeLeft(exercicio.tempoLimite || 0);
     setStartTime(Date.now());
+    setWrongMoveSan(null);
+    setCompareCorrectFen(null);
+    setCompareWrongFen(null);
     
     console.log('✅ Estados resetados para novo exercício');
   }, [exercicio.id, exercicio.conteudo.posicaoInicial, exercicio.tempoLimite]);
@@ -125,6 +131,15 @@ export default function ExercicioInterativoPlayer({
           setFeedback(`Movimento incorreto. Você tem ${maxAttempts - attempts - 1} tentativas restantes.`);
           setFeedbackType('error');
         }
+        setWrongMoveSan(moveNotation);
+        try {
+          const gWrong = new Chess(exercicio.conteudo.posicaoInicial);
+          const gCorrect = new Chess(exercicio.conteudo.posicaoInicial);
+          gWrong.move(moveNotation);
+          gCorrect.move(movimentoCorreto || '');
+          setCompareWrongFen(gWrong.fen());
+          setCompareCorrectFen(gCorrect.fen());
+        } catch {}
       }
 
       return true;
@@ -314,6 +329,26 @@ export default function ExercicioInterativoPlayer({
               <p className="text-yellow-700 text-sm">
                 {exercicio.conteudo.dicas[Math.min(attempts, exercicio.conteudo.dicas.length - 1)]}
               </p>
+            </div>
+          )}
+          {feedbackType === 'error' && wrongMoveSan && (
+            <div className="bg-white rounded-xl p-4 border border-gray-200">
+              <h4 className="font-semibold text-gray-900 mb-2 text-sm">Explicar meu lance</h4>
+              <p className="text-xs text-gray-600 mb-3">Comparação entre seu lance (<strong>{wrongMoveSan}</strong>) e o lance correto (<strong>{movimentoCorreto}</strong>).</p>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div>
+                  <div className="text-xs font-semibold text-red-600 mb-1">Seu lance</div>
+                  <div className="flex justify-center">
+                    <Chessboard position={compareWrongFen || exercicio.conteudo.posicaoInicial} boardWidth={260} arePiecesDraggable={false} />
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-green-600 mb-1">Lance correto</div>
+                  <div className="flex justify-center">
+                    <Chessboard position={compareCorrectFen || exercicio.conteudo.posicaoInicial} boardWidth={260} arePiecesDraggable={false} />
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
