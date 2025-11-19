@@ -43,7 +43,7 @@ export function useLicoes() {
     } finally {
       setLoading(false);
     }
-  }, [licoes]);
+  }, []);
 
   // Atualizar lição existente
   const updateLicao = useCallback(async (id: string, data: LicaoFormData): Promise<Licao> => {
@@ -88,7 +88,7 @@ export function useLicoes() {
     } finally {
       setLoading(false);
     }
-  }, [licoes]);
+  }, []);
 
   // Deletar todas as lições de uma abertura (para exclusão em cascata)
   const deleteLicoesByAbertura = useCallback(async (aberturaId: string): Promise<string[]> => {
@@ -202,4 +202,4 @@ export function useLicoes() {
     reorderLicoes,
     clearError: () => setError(null)
   };
-} 
+}

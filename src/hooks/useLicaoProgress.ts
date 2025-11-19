@@ -48,7 +48,7 @@ export const useLicaoProgress = (exercicios: Exercicio[]) => {
         exerciciosProgress: initialProgress
       }));
     }
-  }, [exercicioIds]); // Usar exercicioIds em vez de exercicios
+  }, [exercicios, exercicioIds]);
 
   const getCurrentExercicio = useCallback(() => {
     return exercicios[progressState.currentExercicioIndex] || null;
@@ -191,4 +191,4 @@ export const useLicaoProgress = (exercicios: Exercicio[]) => {
     hasNext,
     hasPrev
   };
-}; 
+};

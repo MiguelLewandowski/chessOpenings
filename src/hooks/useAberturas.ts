@@ -43,7 +43,7 @@ export function useAberturas() {
     } finally {
       setLoading(false);
     }
-  }, [aberturas]);
+  }, []);
 
   // Atualizar abertura existente
   const updateAbertura = useCallback(async (id: string, data: AberturaFormData): Promise<Abertura> => {
@@ -89,7 +89,7 @@ export function useAberturas() {
     } finally {
       setLoading(false);
     }
-  }, [aberturas]);
+  }, []);
 
   // Buscar abertura por ID
   const getAbertura = useCallback((id: string): Abertura | undefined => {
@@ -163,4 +163,4 @@ export function useAberturas() {
     getAdvancedStats,
     clearError: () => setError(null)
   };
-} 
+}

@@ -43,7 +43,7 @@ export function useExercicios() {
     } finally {
       setLoading(false);
     }
-  }, [exercicios]);
+  }, []);
 
   // Atualizar exercício existente
   const updateExercicio = useCallback(async (id: string, data: ExercicioFormData): Promise<Exercicio> => {
@@ -88,7 +88,7 @@ export function useExercicios() {
     } finally {
       setLoading(false);
     }
-  }, [exercicios]);
+  }, []);
 
   // Deletar todos os exercícios de lições específicas (para exclusão em cascata)
   const deleteExerciciosByLicoes = useCallback(async (licaoIds: string[]): Promise<void> => {
@@ -182,4 +182,4 @@ export function useExercicios() {
     getStats,
     clearError: () => setError(null)
   };
-} 
+}
