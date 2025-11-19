@@ -6,16 +6,19 @@ import { type LicaoFormData } from '@/types/licoes';
 import { useAberturas } from '@/hooks/useAberturas';
 
 interface LicaoFormProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
+  onCancel?: () => void;
   onSubmit: (data: LicaoFormData) => Promise<void>;
   initialData?: LicaoFormData;
   loading?: boolean;
+  isEditing?: boolean;
 }
 
 export default function LicaoForm({
-  isOpen,
+  isOpen = true,
   onClose,
+  onCancel,
   onSubmit,
   initialData,
   loading = false
@@ -102,7 +105,7 @@ export default function LicaoForm({
             </p>
           </div>
           <button
-            onClick={onClose}
+            onClick={onClose ?? onCancel}
             className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
             disabled={loading}
           >
@@ -223,4 +226,4 @@ export default function LicaoForm({
       </div>
     </div>
   );
-} 
+}

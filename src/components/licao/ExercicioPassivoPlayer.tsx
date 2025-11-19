@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Play, Pause, RotateCcw, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Chessboard } from 'react-chessboard';
 import { Chess } from 'chess.js';
@@ -21,7 +21,7 @@ export default function ExercicioPassivoPlayer({
   const [isCompleted, setIsCompleted] = useState(false);
   const [startTime, setStartTime] = useState(Date.now());
 
-  const movimentos = exercicio.conteudo.sequenciaMovimentos || [];
+  const movimentos = useMemo(() => exercicio.conteudo.sequenciaMovimentos ?? [], [exercicio.conteudo.sequenciaMovimentos]);
 
   // CORREÇÃO: Reset completo quando o exercício muda
   useEffect(() => {
@@ -71,7 +71,7 @@ export default function ExercicioPassivoPlayer({
         setIsCompleted(true);
       }
     }
-  }, [currentMoveIndex, movimentos]);
+  }, [currentMoveIndex, movimentos, exercicio.conteudo.posicaoInicial]);
 
   const goToPrevMove = useCallback(() => {
     if (currentMoveIndex > 0) {
@@ -99,10 +99,10 @@ export default function ExercicioPassivoPlayer({
     }
   }, [currentMoveIndex, movimentos, exercicio.conteudo.posicaoInicial]);
 
-  const togglePlay = () => {
+  const togglePlay = useCallback(() => {
     if (isCompleted) return;
-    setIsPlaying(!isPlaying);
-  };
+    setIsPlaying(prev => !prev);
+  }, [isCompleted]);
 
   const handleComplete = () => {
     const timeSpent = Math.floor((Date.now() - startTime) / 1000);
@@ -120,13 +120,14 @@ export default function ExercicioPassivoPlayer({
     }
   }, [isPlaying, isCompleted, currentMoveIndex, movimentos, goToNextMove]);
 
+  const movimentosLength = useMemo(() => movimentos.length, [movimentos]);
   // Suporte ao teclado - funciona sempre, mesmo após completar
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       switch (event.key) {
         case 'ArrowRight':
           event.preventDefault();
-          if (currentMoveIndex < movimentos.length - 1) {
+          if (currentMoveIndex < movimentosLength - 1) {
             goToNextMove();
           }
           break;
@@ -145,7 +146,7 @@ export default function ExercicioPassivoPlayer({
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [goToNextMove, goToPrevMove, togglePlay, isCompleted, currentMoveIndex, movimentos.length]);
+  }, [goToNextMove, goToPrevMove, togglePlay, isCompleted, currentMoveIndex, movimentosLength]);
 
   const getCurrentMove = () => {
     return currentMoveIndex >= 0 ? movimentos[currentMoveIndex] : null;
@@ -337,4 +338,4 @@ export default function ExercicioPassivoPlayer({
       </div>
     </div>
   );
-} 
+}

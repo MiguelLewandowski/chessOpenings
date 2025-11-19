@@ -8,19 +8,22 @@ import { type ExercicioFormData } from '@/types/exercicios';
 import { useLicoes } from '@/hooks/useLicoes';
 
 interface ExercicioFormProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
+  onCancel?: () => void;
   onSubmit: (data: ExercicioFormData) => Promise<void>;
-  initialData?: ExercicioFormData;
+  initialData?: Partial<ExercicioFormData>;
   loading?: boolean;
+  isEditing?: boolean;
 }
 
 export default function ExercicioForm({
-  isOpen,
+  isOpen = true,
   onClose,
+  onCancel,
   onSubmit,
   initialData,
-  loading = false
+  loading = false,
 }: ExercicioFormProps) {
   const { licoes } = useLicoes();
 
@@ -73,9 +76,16 @@ export default function ExercicioForm({
 
   useEffect(() => {
     if (initialData) {
-      setFormData(initialData);
-      // Validar e atualizar FEN inicial
-      validateAndUpdateFEN(initialData.conteudo.posicaoInicial);
+      setFormData(prev => ({
+        ...prev,
+        ...initialData,
+        conteudo: {
+          ...prev.conteudo,
+          ...(initialData.conteudo || {})
+        }
+      }));
+      const fen = initialData.conteudo?.posicaoInicial ?? 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+      validateAndUpdateFEN(fen);
     } else {
       setFormData({
         titulo: '',
@@ -100,7 +110,6 @@ export default function ExercicioForm({
         tempoLimite: 300,
         tentativasMaximas: 3
       });
-      // Resetar tabuleiro para posição inicial
       chess.reset();
       setBoardPosition(chess.fen());
       setFenError('');
@@ -320,7 +329,7 @@ export default function ExercicioForm({
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={onClose ?? onCancel}
             className="p-2 text-gray-400 hover:text-gray-600 rounded-full cursor-pointer"
             disabled={loading}
           >
@@ -1050,4 +1059,4 @@ export default function ExercicioForm({
       </div>
     </div>
   );
-} 
+}
