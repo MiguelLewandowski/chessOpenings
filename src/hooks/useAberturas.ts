@@ -1,39 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import { type Abertura, type AberturaFormData } from '@/types/aberturas';
-import { deleteAberturaWithCascade } from '@/utils/localStorage';
 
 export type { Abertura, AberturaFormData };
 
-// Constante para a chave do localStorage
-const STORAGE_KEY = 'aberturas';
 
-// Função auxiliar para carregar dados do localStorage
-const loadFromStorage = (): Abertura[] => {
-  if (typeof window === 'undefined') return [];
-  
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      return Array.isArray(parsed) ? parsed : [];
-    }
-  } catch (error) {
-    console.warn('Erro ao carregar aberturas do localStorage:', error);
-  }
-  
-  return [];
-};
-
-// Função auxiliar para salvar dados no localStorage
-const saveToStorage = (data: Abertura[]): void => {
-  if (typeof window === 'undefined') return;
-  
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch (error) {
-    console.error('Erro ao salvar aberturas no localStorage:', error);
-  }
-};
 
 export function useAberturas() {
   const [aberturas, setAberturas] = useState<Abertura[]>([]);
@@ -42,21 +12,15 @@ export function useAberturas() {
 
   // Carregar dados do localStorage na inicialização
   useEffect(() => {
-    const storedData = loadFromStorage();
-    setAberturas(storedData);
+    const fetchData = async () => {
+      const res = await fetch('/api/aberturas')
+      const data = await res.json()
+      setAberturas(data)
+    }
+    fetchData()
   }, []);
 
-  // Função para gerar ID único
-  const generateId = () => Math.random().toString(36).substr(2, 9);
-
-  // Simular delay de API
-  const simulateApiDelay = () => new Promise(resolve => setTimeout(resolve, 500));
-
-  // Função auxiliar para atualizar estado e localStorage
-  const updateStateAndStorage = useCallback((newData: Abertura[]) => {
-    setAberturas(newData);
-    saveToStorage(newData);
-  }, []);
+  // Helpers removidos após migração para API
 
   // Criar nova abertura
   const createAbertura = useCallback(async (data: AberturaFormData): Promise<Abertura> => {
@@ -64,19 +28,14 @@ export function useAberturas() {
     setError(null);
     
     try {
-      await simulateApiDelay();
-      
-      const novaAbertura: Abertura = {
-        ...data,
-        id: generateId(),
-        criadoEm: new Date().toISOString().split('T')[0],
-        atualizadoEm: new Date().toISOString().split('T')[0]
-      };
-
-      const newAberturas = [novaAbertura, ...aberturas];
-      updateStateAndStorage(newAberturas);
-      
-      return novaAbertura;
+      const res = await fetch('/api/aberturas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      const created = await res.json()
+      setAberturas(prev => [created, ...prev])
+      return created
     } catch {
       const errorMessage = 'Erro ao criar abertura';
       setError(errorMessage);
@@ -84,7 +43,7 @@ export function useAberturas() {
     } finally {
       setLoading(false);
     }
-  }, [aberturas, updateStateAndStorage]);
+  }, [aberturas]);
 
   // Atualizar abertura existente
   const updateAbertura = useCallback(async (id: string, data: AberturaFormData): Promise<Abertura> => {
@@ -92,23 +51,19 @@ export function useAberturas() {
     setError(null);
     
     try {
-      await simulateApiDelay();
-      
       const aberturaExistente = aberturas.find(a => a.id === id);
       if (!aberturaExistente) {
         throw new Error('Abertura não encontrada');
       }
 
-      const aberturaAtualizada: Abertura = {
-        ...aberturaExistente,
-        ...data,
-        atualizadoEm: new Date().toISOString().split('T')[0]
-      };
-
-      const newAberturas = aberturas.map(a => a.id === id ? aberturaAtualizada : a);
-      updateStateAndStorage(newAberturas);
-      
-      return aberturaAtualizada;
+      const res = await fetch(`/api/aberturas/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      const updated = await res.json()
+      setAberturas(prev => prev.map(a => a.id === id ? updated : a))
+      return updated
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao atualizar abertura';
       setError(errorMessage);
@@ -116,7 +71,7 @@ export function useAberturas() {
     } finally {
       setLoading(false);
     }
-  }, [aberturas, updateStateAndStorage]);
+  }, [aberturas]);
 
   // Deletar abertura com exclusão em cascata
   const deleteAbertura = useCallback(async (id: string): Promise<void> => {
@@ -124,20 +79,8 @@ export function useAberturas() {
     setError(null);
     
     try {
-      await simulateApiDelay();
-      
-      // Usar a função de exclusão em cascata
-      const resultado = await deleteAberturaWithCascade(id);
-      
-      // Recarregar dados do localStorage para manter o estado sincronizado
-      const updatedAberturas = loadFromStorage();
-      setAberturas(updatedAberturas);
-      
-      // Log para feedback (pode ser usado para notificações)
-      console.log(`Abertura excluída com sucesso:
-        - 1 abertura removida
-        - ${resultado.licoesRemovidas} lições removidas
-        - ${resultado.exerciciosRemovidos} exercícios removidos`);
+      await fetch(`/api/aberturas/${id}`, { method: 'DELETE' })
+      setAberturas(prev => prev.filter(a => a.id !== id))
         
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao deletar abertura';
@@ -146,7 +89,7 @@ export function useAberturas() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [aberturas]);
 
   // Buscar abertura por ID
   const getAbertura = useCallback((id: string): Abertura | undefined => {

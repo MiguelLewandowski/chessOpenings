@@ -6,6 +6,7 @@ import { type Exercicio } from '@/types/exercicios';
 // 🎯 Tipos para o progresso global do usuário
 export interface LicaoProgressData {
   licaoId: string;
+  aberturaId: string;
   isCompleted: boolean;
   exerciciosProgress: ExercicioProgress[];
   totalScore: number;
@@ -40,7 +41,7 @@ interface UserProgressState {
   isLicaoUnlocked: (aberturaId: string, licaoIndex: number) => boolean;
   
   // Ações para lições
-  initializeLicao: (licaoId: string, exercicios: Exercicio[]) => void;
+  initializeLicao: (licaoId: string, exercicios: Exercicio[], aberturaId: string) => void;
   updateLicaoProgress: (licaoId: string, exerciciosProgress: ExercicioProgress[], totalScore: number, totalTime: number) => void;
   completeLicao: (licaoId: string, aberturaId: string, licaoIndex: number) => void;
   getLicaoProgress: (licaoId: string) => LicaoProgressData | null;
@@ -108,7 +109,7 @@ export const useUserProgress = create<UserProgressState>()(
       },
       
       // Inicializar progresso de uma lição
-      initializeLicao: (licaoId: string, exercicios: Exercicio[]) => {
+      initializeLicao: (licaoId: string, exercicios: Exercicio[], aberturaId: string) => {
         const state = get();
         if (!state.licaoProgress[licaoId]) {
           const initialProgress: ExercicioProgress[] = exercicios.map(exercicio => ({
@@ -124,6 +125,7 @@ export const useUserProgress = create<UserProgressState>()(
               ...state.licaoProgress,
               [licaoId]: {
                 licaoId,
+                aberturaId,
                 isCompleted: false,
                 exerciciosProgress: initialProgress,
                 totalScore: 0,
@@ -149,6 +151,11 @@ export const useUserProgress = create<UserProgressState>()(
             }
           }
         }));
+        fetch('/api/progress/licoes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ licaoId, isCompleted: get().licaoProgress[licaoId]?.isCompleted || false, totalScore, totalTime })
+        })
       },
       
       // Completar uma lição
@@ -202,6 +209,18 @@ export const useUserProgress = create<UserProgressState>()(
             }
           };
         });
+        const lp = get().licaoProgress[licaoId]
+        fetch('/api/progress/licoes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ licaoId, isCompleted: true, totalScore: lp?.totalScore || 0, totalTime: lp?.totalTime || 0, completedAt: new Date().toISOString() })
+        })
+        const ap = get().aberturaProgress[aberturaId]
+        fetch('/api/progress/aberturas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ aberturaId, currentLicaoIndex: ap?.currentLicaoIndex || licaoIndex + 1, totalScore: ap?.totalScore || 0, totalTime: ap?.totalTime || 0, isCompleted: ap?.isCompleted || false })
+        })
       },
       
       // Obter progresso de uma lição
@@ -223,11 +242,11 @@ export const useUserProgress = create<UserProgressState>()(
           const newAberturaProgress = { ...state.aberturaProgress };
           delete newAberturaProgress[aberturaId];
           
-          // Também remover progresso das lições desta abertura
           const newLicaoProgress = { ...state.licaoProgress };
-          Object.keys(newLicaoProgress).forEach(() => {
-            // TODO: Precisaríamos de uma forma de identificar lições por abertura
-            // Por ora, mantemos todas as lições
+          Object.entries(newLicaoProgress).forEach(([id, progress]) => {
+            if (progress.aberturaId === aberturaId) {
+              delete newLicaoProgress[id];
+            }
           });
           
           return {
@@ -235,6 +254,7 @@ export const useUserProgress = create<UserProgressState>()(
             licaoProgress: newLicaoProgress
           };
         });
+        fetch(`/api/progress/aberturas?aberturaId=${aberturaId}`, { method: 'DELETE' })
       },
       
       // Estatísticas globais

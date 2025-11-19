@@ -3,36 +3,7 @@ import { type Licao, type LicaoFormData } from '@/types/licoes';
 
 export type { Licao, LicaoFormData };
 
-// Constante para a chave do localStorage
-const STORAGE_KEY = 'licoes';
 
-// Função auxiliar para carregar dados do localStorage
-const loadFromStorage = (): Licao[] => {
-  if (typeof window === 'undefined') return [];
-  
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      return Array.isArray(parsed) ? parsed : [];
-    }
-  } catch (error) {
-    console.warn('Erro ao carregar lições do localStorage:', error);
-  }
-  
-  return [];
-};
-
-// Função auxiliar para salvar dados no localStorage
-const saveToStorage = (data: Licao[]): void => {
-  if (typeof window === 'undefined') return;
-  
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch (error) {
-    console.error('Erro ao salvar lições no localStorage:', error);
-  }
-};
 
 export function useLicoes() {
   const [licoes, setLicoes] = useState<Licao[]>([]);
@@ -41,21 +12,15 @@ export function useLicoes() {
 
   // Carregar dados do localStorage na inicialização
   useEffect(() => {
-    const storedData = loadFromStorage();
-    setLicoes(storedData);
+    const fetchData = async () => {
+      const res = await fetch('/api/licoes')
+      const data = await res.json()
+      setLicoes(data)
+    }
+    fetchData()
   }, []);
 
-  // Função para gerar ID único
-  const generateId = () => Math.random().toString(36).substr(2, 9);
-
-  // Simular delay de API
-  const simulateApiDelay = () => new Promise(resolve => setTimeout(resolve, 500));
-
-  // Função auxiliar para atualizar estado e localStorage
-  const updateStateAndStorage = useCallback((newData: Licao[]) => {
-    setLicoes(newData);
-    saveToStorage(newData);
-  }, []);
+// Helpers removidos após migração para API
 
   // Criar nova lição
   const createLicao = useCallback(async (data: LicaoFormData): Promise<Licao> => {
@@ -63,19 +28,14 @@ export function useLicoes() {
     setError(null);
     
     try {
-      await simulateApiDelay();
-      
-      const novaLicao: Licao = {
-        ...data,
-        id: generateId(),
-        criadoEm: new Date().toISOString().split('T')[0],
-        atualizadoEm: new Date().toISOString().split('T')[0]
-      };
-
-      const newLicoes = [novaLicao, ...licoes];
-      updateStateAndStorage(newLicoes);
-      
-      return novaLicao;
+      const res = await fetch('/api/licoes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      const created = await res.json()
+      setLicoes(prev => [created, ...prev])
+      return created
     } catch {
       const errorMessage = 'Erro ao criar lição';
       setError(errorMessage);
@@ -83,7 +43,7 @@ export function useLicoes() {
     } finally {
       setLoading(false);
     }
-  }, [licoes, updateStateAndStorage]);
+  }, [licoes]);
 
   // Atualizar lição existente
   const updateLicao = useCallback(async (id: string, data: LicaoFormData): Promise<Licao> => {
@@ -91,23 +51,19 @@ export function useLicoes() {
     setError(null);
     
     try {
-      await simulateApiDelay();
-      
       const licaoExistente = licoes.find(l => l.id === id);
       if (!licaoExistente) {
         throw new Error('Lição não encontrada');
       }
 
-      const licaoAtualizada: Licao = {
-        ...licaoExistente,
-        ...data,
-        atualizadoEm: new Date().toISOString().split('T')[0]
-      };
-
-      const newLicoes = licoes.map(l => l.id === id ? licaoAtualizada : l);
-      updateStateAndStorage(newLicoes);
-      
-      return licaoAtualizada;
+      const res = await fetch(`/api/licoes/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      const updated = await res.json()
+      setLicoes(prev => prev.map(l => l.id === id ? updated : l))
+      return updated
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao atualizar lição';
       setError(errorMessage);
@@ -115,7 +71,7 @@ export function useLicoes() {
     } finally {
       setLoading(false);
     }
-  }, [licoes, updateStateAndStorage]);
+  }, [licoes]);
 
   // Deletar lição
   const deleteLicao = useCallback(async (id: string): Promise<void> => {
@@ -123,10 +79,8 @@ export function useLicoes() {
     setError(null);
     
     try {
-      await simulateApiDelay();
-      
-      const newLicoes = licoes.filter(l => l.id !== id);
-      updateStateAndStorage(newLicoes);
+      await fetch(`/api/licoes/${id}`, { method: 'DELETE' })
+      setLicoes(prev => prev.filter(l => l.id !== id))
     } catch {
       const errorMessage = 'Erro ao deletar lição';
       setError(errorMessage);
@@ -134,7 +88,7 @@ export function useLicoes() {
     } finally {
       setLoading(false);
     }
-  }, [licoes, updateStateAndStorage]);
+  }, [licoes]);
 
   // Deletar todas as lições de uma abertura (para exclusão em cascata)
   const deleteLicoesByAbertura = useCallback(async (aberturaId: string): Promise<string[]> => {
@@ -142,17 +96,13 @@ export function useLicoes() {
     setError(null);
     
     try {
-      await simulateApiDelay();
-      
-      // Encontrar todas as lições da abertura
-      const licoesParaDeletar = licoes.filter(l => l.aberturaId === aberturaId);
-      const idsLicoesDeletadas = licoesParaDeletar.map(l => l.id);
-      
-      // Filtrar para manter apenas as lições que não são da abertura
-      const newLicoes = licoes.filter(l => l.aberturaId !== aberturaId);
-      updateStateAndStorage(newLicoes);
-      
-      return idsLicoesDeletadas;
+      const toDelete = licoes.filter(l => l.aberturaId === aberturaId)
+      const ids = toDelete.map(l => l.id)
+      for (const id of ids) {
+        await fetch(`/api/licoes/${id}`, { method: 'DELETE' })
+      }
+      setLicoes(prev => prev.filter(l => l.aberturaId !== aberturaId))
+      return ids
     } catch {
       const errorMessage = 'Erro ao deletar lições da abertura';
       setError(errorMessage);
@@ -160,7 +110,7 @@ export function useLicoes() {
     } finally {
       setLoading(false);
     }
-  }, [licoes, updateStateAndStorage]);
+  }, [licoes]);
 
   // Buscar lição por ID
   const getLicao = useCallback((id: string): Licao | undefined => {
@@ -213,9 +163,6 @@ export function useLicoes() {
     setError(null);
     
     try {
-      // Simular delay de API
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
       // Criar novo array com as lições reordenadas
       const newLicoes = licoes.map(licao => {
         // Se a lição pertence à abertura sendo reordenada, usa a versão reordenada
@@ -230,7 +177,7 @@ export function useLicoes() {
         return licao;
       });
 
-      updateStateAndStorage(newLicoes);
+      setLicoes(newLicoes)
     } catch {
       const errorMessage = 'Erro ao reordenar lições';
       setError(errorMessage);
@@ -238,7 +185,7 @@ export function useLicoes() {
     } finally {
       setLoading(false);
     }
-  }, [licoes, updateStateAndStorage]);
+  }, [licoes]);
 
   return {
     licoes,

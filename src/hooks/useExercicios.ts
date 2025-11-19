@@ -3,36 +3,7 @@ import { type Exercicio, type ExercicioFormData } from '@/types/exercicios';
 
 export type { Exercicio, ExercicioFormData };
 
-// Constante para a chave do localStorage
-const STORAGE_KEY = 'exercicios';
 
-// Função auxiliar para carregar dados do localStorage
-const loadFromStorage = (): Exercicio[] => {
-  if (typeof window === 'undefined') return [];
-  
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      return Array.isArray(parsed) ? parsed : [];
-    }
-  } catch (error) {
-    console.warn('Erro ao carregar exercícios do localStorage:', error);
-  }
-  
-  return [];
-};
-
-// Função auxiliar para salvar dados no localStorage
-const saveToStorage = (data: Exercicio[]): void => {
-  if (typeof window === 'undefined') return;
-  
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch (error) {
-    console.error('Erro ao salvar exercícios no localStorage:', error);
-  }
-};
 
 export function useExercicios() {
   const [exercicios, setExercicios] = useState<Exercicio[]>([]);
@@ -41,21 +12,15 @@ export function useExercicios() {
 
   // Carregar dados do localStorage na inicialização
   useEffect(() => {
-    const storedData = loadFromStorage();
-    setExercicios(storedData);
+    const fetchData = async () => {
+      const res = await fetch('/api/exercicios')
+      const data = await res.json()
+      setExercicios(data)
+    }
+    fetchData()
   }, []);
 
-  // Função para gerar ID único
-  const generateId = () => Math.random().toString(36).substr(2, 9);
-
-  // Simular delay de API
-  const simulateApiDelay = () => new Promise(resolve => setTimeout(resolve, 500));
-
-  // Função auxiliar para atualizar estado e localStorage
-  const updateStateAndStorage = useCallback((newData: Exercicio[]) => {
-    setExercicios(newData);
-    saveToStorage(newData);
-  }, []);
+// Helpers removidos após migração para API
 
   // Criar novo exercício
   const createExercicio = useCallback(async (data: ExercicioFormData): Promise<Exercicio> => {
@@ -63,19 +28,14 @@ export function useExercicios() {
     setError(null);
     
     try {
-      await simulateApiDelay();
-      
-      const novoExercicio: Exercicio = {
-        ...data,
-        id: generateId(),
-        criadoEm: new Date().toISOString().split('T')[0],
-        atualizadoEm: new Date().toISOString().split('T')[0]
-      };
-
-      const newExercicios = [novoExercicio, ...exercicios];
-      updateStateAndStorage(newExercicios);
-      
-      return novoExercicio;
+      const res = await fetch('/api/exercicios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      const created = await res.json()
+      setExercicios(prev => [created, ...prev])
+      return created
     } catch {
       const errorMessage = 'Erro ao criar exercício';
       setError(errorMessage);
@@ -83,7 +43,7 @@ export function useExercicios() {
     } finally {
       setLoading(false);
     }
-  }, [exercicios, updateStateAndStorage]);
+  }, [exercicios]);
 
   // Atualizar exercício existente
   const updateExercicio = useCallback(async (id: string, data: ExercicioFormData): Promise<Exercicio> => {
@@ -91,23 +51,19 @@ export function useExercicios() {
     setError(null);
     
     try {
-      await simulateApiDelay();
-      
       const exercicioExistente = exercicios.find(e => e.id === id);
       if (!exercicioExistente) {
         throw new Error('Exercício não encontrado');
       }
 
-      const exercicioAtualizado: Exercicio = {
-        ...exercicioExistente,
-        ...data,
-        atualizadoEm: new Date().toISOString().split('T')[0]
-      };
-
-      const newExercicios = exercicios.map(e => e.id === id ? exercicioAtualizado : e);
-      updateStateAndStorage(newExercicios);
-      
-      return exercicioAtualizado;
+      const res = await fetch(`/api/exercicios/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      const updated = await res.json()
+      setExercicios(prev => prev.map(e => e.id === id ? updated : e))
+      return updated
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao atualizar exercício';
       setError(errorMessage);
@@ -115,7 +71,7 @@ export function useExercicios() {
     } finally {
       setLoading(false);
     }
-  }, [exercicios, updateStateAndStorage]);
+  }, [exercicios]);
 
   // Deletar exercício
   const deleteExercicio = useCallback(async (id: string): Promise<void> => {
@@ -123,10 +79,8 @@ export function useExercicios() {
     setError(null);
     
     try {
-      await simulateApiDelay();
-      
-      const newExercicios = exercicios.filter(e => e.id !== id);
-      updateStateAndStorage(newExercicios);
+      await fetch(`/api/exercicios/${id}`, { method: 'DELETE' })
+      setExercicios(prev => prev.filter(e => e.id !== id))
     } catch {
       const errorMessage = 'Erro ao deletar exercício';
       setError(errorMessage);
@@ -134,7 +88,7 @@ export function useExercicios() {
     } finally {
       setLoading(false);
     }
-  }, [exercicios, updateStateAndStorage]);
+  }, [exercicios]);
 
   // Deletar todos os exercícios de lições específicas (para exclusão em cascata)
   const deleteExerciciosByLicoes = useCallback(async (licaoIds: string[]): Promise<void> => {
@@ -142,11 +96,13 @@ export function useExercicios() {
     setError(null);
     
     try {
-      await simulateApiDelay();
-      
       // Filtrar para manter apenas exercícios que não pertencem às lições deletadas
-      const newExercicios = exercicios.filter(e => !licaoIds.includes(e.licaoId));
-      updateStateAndStorage(newExercicios);
+      const keep = exercicios.filter(e => !licaoIds.includes(e.licaoId))
+      const remove = exercicios.filter(e => licaoIds.includes(e.licaoId))
+      for (const ex of remove) {
+        await fetch(`/api/exercicios/${ex.id}`, { method: 'DELETE' })
+      }
+      setExercicios(keep)
     } catch {
       const errorMessage = 'Erro ao deletar exercícios das lições';
       setError(errorMessage);
@@ -154,7 +110,7 @@ export function useExercicios() {
     } finally {
       setLoading(false);
     }
-  }, [exercicios, updateStateAndStorage]);
+  }, [exercicios]);
 
   // Buscar exercício por ID
   const getExercicio = useCallback((id: string): Exercicio | undefined => {
