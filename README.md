@@ -4,6 +4,46 @@ Uma plataforma educacional de xadrez inspirada no Duolingo, que utiliza gamifica
 
 ---
 
+## ⚡ **Início Rápido (Local)**
+
+```bash
+# 1) Instalar dependências
+git clone <repository-url>
+cd chess-openings
+npm install
+
+# 2) Configurar ambiente
+cp .env.example .env
+# Edite .env se necessário (DATABASE_URL aponta para localhost:5432)
+
+# 3) Subir somente o banco com Docker
+docker-compose up -d db
+
+# 4) Prisma (gerar client e aplicar schema)
+npx prisma generate
+npx prisma db push
+npx prisma db seed  # opcional, popula dados de exemplo
+
+# 5) Executar a aplicação
+# Desenvolvimento
+npm run dev
+# Produção
+npm run build && npm run start
+```
+
+- App: `http://localhost:3000`
+- Banco (container): `localhost:5432` • usuário `postgres` • senha `postgres` • db `chessopenings`
+
+```bash
+# Parar/remover o banco em Docker quando terminar
+docker-compose down
+```
+
+Observações:
+- `.env.example` contém as variáveis necessárias; copie para `.env` e ajuste se usar credenciais próprias.
+- Para silenciar telemetria do Next.js, mantenha `NEXT_TELEMETRY_DISABLED=1` no `.env`.
+- Não adicione chaves privadas reais ao repositório. Use placeholders no `.env.example`.
+
 ## 🎯 **Status do Projeto**
 
 **Versão:** 3.3.3 - **MVP Funcional**
@@ -63,57 +103,15 @@ Uma plataforma educacional de xadrez inspirada no Duolingo, que utiliza gamifica
 
 ---
 
-## ⚡ **Início Rápido**
 
-```bash
-# Clone e instale
-git clone <repository-url>
-cd chess-openings
-npm install
-
-# Desenvolvimento
-npm run dev
-
-# Produção
-npm run build
-npm run start
-```
-
-### **Com Docker**
-
-```bash
-cp .env.example .env
-docker-compose up --build
-```
-
-App: `http://localhost:3000` • Banco: `localhost:5432` (usuário `postgres`, senha `postgres`, db `chessopenings`).
-
-### **Banco e Prisma**
-
-```bash
-# Gerar client
-npm run prisma:generate
-# Migrações em dev
-npm run db:migrate
-# Aplicar migrações em prod
-npm run db:deploy
-# Seed
-npm run db:seed
-```
-
-Conteúdo seedado: 15 lições × 5 exercícios para a Abertura Italiana, com FEN derivada via `chess.js`.
 
 ### FEN e Exercícios
 - Passivos: usam `posicaoInicial` em FEN e sequência de lances SAN; ao reproduzir, o cliente deriva a FEN de cada passo quando ausente.
 - Interativos: `posicaoInicial` em FEN e `movimentoCorreto` em SAN; validação e atualização do tabuleiro por `chess.js`.
 - Quiz: `posicaoInicial` em FEN, opções SAN e preview do lance selecionado com `chess.js`.
 
-#### **Windows – Falhas ao baixar engines do Prisma**
-- Se ocorrer erro 500 ao baixar binários (instabilidade do CDN), use:
-  - PowerShell: `setx PRISMA_CLIENT_ENGINE_TYPE binary` e reinicie o terminal
-  - Git Bash: `export PRISMA_CLIENT_ENGINE_TYPE=binary`
-- O projeto já força `binary` no script (`npm run prisma:generate`).
-- Alternativa: `docker-compose up --build` gera client, aplica schema e faz seed dentro do container.
+#### **Compatibilidade do Prisma**
+- No Windows, use terminais atualizados. Se houver falhas em engines do Prisma, manter `engine=binary` já resolve na maioria dos casos.
 
 ### **Acesso às Interfaces**
 
