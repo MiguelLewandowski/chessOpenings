@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   Plus,
@@ -25,7 +25,7 @@ import ExercicioForm from '@/components/ExercicioForm';
 import { type ExercicioFormData } from '@/types/exercicios';
 import Link from 'next/link';
 
-export default function GerenciamentoExercicios() {
+function AdminExerciciosContent() {
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterAbertura, setFilterAbertura] = useState<string>('all');
@@ -557,4 +557,12 @@ export default function GerenciamentoExercicios() {
       )}
     </div>
   );
-} 
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div className="p-6">Carregando...</div>}>
+      <AdminExerciciosContent />
+    </Suspense>
+  )
+}

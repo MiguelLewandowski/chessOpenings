@@ -10,6 +10,8 @@ import { RotateCcw, ChevronLeft, ChevronRight, Target, Zap } from 'lucide-react'
 import { useAberturas } from '@/hooks/useAberturas'
 import { useLicoes } from '@/hooks/useLicoes'
 import { useExercicios } from '@/hooks/useExercicios'
+import { type MovimentoPassivo } from '@/types/exercicios'
+type Square = Parameters<Chess['get']>[0]
 import { SimpleEngine } from '@/utils/engine/simple'
 
 export default function TreinoContraLinha() {
@@ -28,7 +30,7 @@ export default function TreinoContraLinha() {
     for (const l of lcs) {
       const passivos = exercicios.filter(e => e.licaoId === l.id && e.tipo === 'Passivo')
       for (const ex of passivos) {
-        const seq = (ex.conteudo?.sequenciaMovimentos || []).map((m: any) => m.movimento)
+        const seq = (ex.conteudo?.sequenciaMovimentos || []).map((m: MovimentoPassivo) => m.movimento)
         if (seq.length) {
           opts.push({ id: `licao-${l.id}`, name: l.titulo, seq })
           break
@@ -87,7 +89,7 @@ export default function TreinoContraLinha() {
         setGame(g2)
         setBookIndex(bookIndex + 1)
         const chk2 = new Chess(g2.fen())
-        if ((chk2 as any).isCheckmate && (chk2 as any).isCheckmate()) setFeedback('Xeque-mate!')
+        if (chk2.isCheckmate()) setFeedback('Xeque-mate!')
         return
       } catch {}
     }
@@ -95,13 +97,13 @@ export default function TreinoContraLinha() {
     if (!bestUci) return
     const from = bestUci.slice(0,2)
     const to = bestUci.slice(2,4)
-    const promo = bestUci.length > 4 ? bestUci.slice(4,5) : undefined
+    const promo: 'q' | 'r' | 'b' | 'n' | undefined = bestUci.length > 4 ? (bestUci.slice(4,5) as 'q' | 'r' | 'b' | 'n') : undefined
     try {
       const g2 = new Chess(current.fen())
-      g2.move({ from, to, promotion: promo as any })
+      g2.move({ from, to, promotion: promo })
       setGame(g2)
       const chk3 = new Chess(g2.fen())
-      if ((chk3 as any).isCheckmate && (chk3 as any).isCheckmate()) setFeedback('Xeque-mate!')
+      if (chk3.isCheckmate()) setFeedback('Xeque-mate!')
       // não incrementa bookIndex se não for livro
     } catch {
       setFeedback('Engine não pôde jogar nesta posição.')
@@ -114,7 +116,7 @@ export default function TreinoContraLinha() {
     if (game.turn() !== userColor) return false
     const g = new Chess(game.fen())
     // Detecta promoção apenas para peão alcançando última fileira
-    const piece = g.get ? g.get(from) : null
+    const piece = g.get ? g.get(from as Square) : null
     const isPawn = piece && piece.type === 'p'
     const lastRank = userColor === 'w' ? '8' : '1'
     // If pawn reaches last rank, prompt for promotion
@@ -122,7 +124,7 @@ export default function TreinoContraLinha() {
       setPendingPromotion({ from, to })
       return false
     }
-    let move = g.move({ from, to })
+    const move = g.move({ from, to })
     if (!move) return false
     const expected = sequence[bookIndex]
     const expectedTurnColor = bookIndex % 2 === 0 ? 'w' : 'b'
@@ -144,7 +146,7 @@ export default function TreinoContraLinha() {
       }
     }
     const chk = new Chess(g.fen())
-    if ((chk as any).isCheckmate && (chk as any).isCheckmate()) setFeedback('Xeque-mate!')
+    if (chk.isCheckmate()) setFeedback('Xeque-mate!')
     // Engine responde
     setTimeout(() => { respondEngine(new Chess(g.fen())) }, 10)
     return true
@@ -201,11 +203,11 @@ export default function TreinoContraLinha() {
             {pendingPromotion && (
               <div className="mt-2 flex items-center gap-2 text-sm">
                 <span className="text-gray-700">Promoção:</span>
-                {['q','r','b','n'].map(p => (
+                {(['q','r','b','n'] as const).map(p => (
                   <button key={p} onClick={() => {
                     const g = new Chess(game.fen())
                     try {
-                      g.move({ from: pendingPromotion.from, to: pendingPromotion.to, promotion: p as any })
+                      g.move({ from: pendingPromotion.from, to: pendingPromotion.to, promotion: p })
                       setGame(g)
                       setPendingPromotion(null)
                       // após promoção, engine responde
