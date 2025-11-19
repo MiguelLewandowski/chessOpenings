@@ -56,10 +56,10 @@ export default function Home() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="flex items-center justify-center gap-2 font-interface font-semibold bg-blue-600 text-white px-8 py-4 rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg shadow-blue-600/25 text-lg">
+                <Link href="/quiz" className="flex items-center justify-center gap-2 font-interface font-semibold bg-blue-600 text-white px-8 py-4 rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg shadow-blue-600/25 text-lg">
                   <Sparkles size={20} />
                   Fazer Quiz de Estilo
-                </button>
+                </Link>
                 <Link
                   href="/aberturas"
                   className="flex items-center justify-center gap-2 font-interface font-semibold text-gray-700 px-8 py-4 rounded-xl border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-colors"

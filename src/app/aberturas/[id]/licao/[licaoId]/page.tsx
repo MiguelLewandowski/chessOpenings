@@ -56,9 +56,9 @@ export default function LicaoPage() {
 
   useEffect(() => {
     if (licaoId && exerciciosLicao.length > 0) {
-      initializeLicao(licaoId, exerciciosLicao);
+      initializeLicao(licaoId, exerciciosLicao, aberturaId);
     }
-  }, [licaoId, exerciciosLicao, initializeLicao]);
+  }, [licaoId, exerciciosLicao, aberturaId, initializeLicao]);
 
   const progressHook = useLicaoProgress(exerciciosLicao);
   

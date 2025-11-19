@@ -7,17 +7,14 @@ import {
   Search,
   Edit,
   Trash2,
-  Eye,
   Target,
   Trophy,
   Zap,
   Brain,
   Crown,
-  MoreVertical,
   Loader2,
   X,
   Timer,
-  BookOpen,
   ArrowLeft,
   AlertCircle
 } from 'lucide-react';
@@ -117,15 +114,6 @@ export default function GerenciamentoExercicios() {
   const exerciciosExibir = filterAbertura === 'all' 
     ? exerciciosAgrupados 
     : exerciciosAgrupados.filter(grupo => grupo.abertura.id === filterAbertura);
-
-  const getTipoIcon = (tipo: string) => {
-    switch (tipo) {
-      case 'Passivo': return <Eye className="text-yellow-500" size={16} />;
-      case 'Interativo': return <Brain className="text-blue-500" size={16} />;
-      case 'Prático': return <Target className="text-green-500" size={16} />;
-      default: return <Target className="text-gray-500" size={16} />;
-    }
-  };
 
   const getTipoColor = (tipo: string) => {
     switch (tipo) {
