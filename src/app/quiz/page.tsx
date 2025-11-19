@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Brain, Zap, Shield, Stars, Crown, Compass, ArrowRight, CheckCircle } from 'lucide-react'
 import Navbar from '@/components/Navbar'
+import { type Abertura } from '@/types/aberturas'
 
 type Answer = 'Tática' | 'Posicional' | 'Universal'
 
@@ -79,7 +80,7 @@ export default function StyleQuizPage() {
   const [answers, setAnswers] = useState<Record<string, Answer>>({})
   const [submitting, setSubmitting] = useState(false)
   const [result, setResult] = useState<Answer | null>(null)
-  const [recommended, setRecommended] = useState<any[]>([])
+  const [recommended, setRecommended] = useState<Abertura[]>([])
 
   const score = useMemo(() => {
     const tally: Record<Answer, number> = { 'Tática': 0, 'Posicional': 0, 'Universal': 0 }
@@ -97,8 +98,8 @@ export default function StyleQuizPage() {
     if (!result) return
     ;(async () => {
       const res = await fetch('/api/aberturas')
-      const items = await res.json()
-      const filtered = items.filter((a: any) => a.categoria === result)
+      const items = (await res.json()) as Abertura[]
+      const filtered = items.filter((a: Abertura) => a.categoria === result)
       setRecommended(filtered.slice(0, 6))
     })()
   }, [result])
@@ -210,7 +211,7 @@ export default function StyleQuizPage() {
               <h2 className="font-title text-2xl font-bold text-gray-900 mb-3">Aberturas Recomendadas</h2>
               {recommended.length > 0 ? (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {recommended.map((a: any) => (
+                  {recommended.map((a: Abertura) => (
                     <div key={a.id} className="bg-white rounded-xl border border-gray-200 p-4">
                       <div className="font-title font-bold text-gray-900 mb-1">{a.nome}</div>
                       <div className="text-sm text-gray-600 mb-2">{a.descricao}</div>
