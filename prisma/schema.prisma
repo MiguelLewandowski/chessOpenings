@@ -1,0 +1,114 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Categoria {
+  Tatica
+  Posicional
+  Universal
+}
+
+enum Dificuldade {
+  Iniciante
+  Intermediario
+  Avancado
+}
+
+enum Status {
+  Ativo
+  Rascunho
+  Arquivado
+}
+
+enum ExercicioTipo {
+  Passivo
+  Interativo
+  Quiz
+}
+
+model Abertura {
+  id           String      @id @default(cuid())
+  nome         String
+  categoria    Categoria
+  dificuldade  Dificuldade
+  movimentos   String[]
+  descricao    String
+  status       Status
+  criadoEm     DateTime    @default(now())
+  atualizadoEm DateTime    @updatedAt
+  licoes       Licao[]
+  progressos   AberturaProgress[]
+}
+
+model Licao {
+  id             String      @id @default(cuid())
+  titulo         String
+  descricao      String
+  aberturaId     String
+  ordem          Int
+  dificuldade    Dificuldade
+  status         Status
+  estimativaTempo Int
+  pontuacao      Int
+  criadoEm       DateTime    @default(now())
+  atualizadoEm   DateTime    @updatedAt
+  abertura       Abertura    @relation(fields: [aberturaId], references: [id], onDelete: Cascade)
+  exercicios     Exercicio[]
+  progressos     LicaoProgress[]
+}
+
+model Exercicio {
+  id               String        @id @default(cuid())
+  titulo           String
+  descricao        String
+  licaoId          String
+  ordem            Int
+  tipo             ExercicioTipo
+  dificuldade      Dificuldade
+  status           Status
+  conteudo         Json
+  pontuacao        Int
+  tempoLimite      Int?
+  tentativasMaximas Int
+  criadoEm         DateTime      @default(now())
+  atualizadoEm     DateTime      @updatedAt
+  licao            Licao         @relation(fields: [licaoId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id       String @id @default("default")
+  progressAberturas AberturaProgress[]
+  progressLicoes    LicaoProgress[]
+}
+
+model AberturaProgress {
+  id               String    @id @default(cuid())
+  userId           String
+  aberturaId       String
+  currentLicaoIndex Int
+  totalScore       Int       @default(0)
+  totalTime        Int       @default(0)
+  isCompleted      Boolean   @default(false)
+  updatedAt        DateTime  @updatedAt
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  abertura         Abertura  @relation(fields: [aberturaId], references: [id], onDelete: Cascade)
+}
+
+model LicaoProgress {
+  id           String    @id @default(cuid())
+  userId       String
+  licaoId      String
+  isCompleted  Boolean   @default(false)
+  totalScore   Int       @default(0)
+  totalTime    Int       @default(0)
+  completedAt  DateTime?
+  updatedAt    DateTime  @updatedAt
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  licao        Licao     @relation(fields: [licaoId], references: [id], onDelete: Cascade)
+}
