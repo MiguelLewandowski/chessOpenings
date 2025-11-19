@@ -39,9 +39,9 @@ export class SimpleEngine {
     const deadline = Date.now() + Math.max(200, timeMs)
     const game = new Chess()
     try { game.load(fen) } catch { return '' }
-    const moves = game.moves({ verbose: true })
+    const moves = game.moves({ verbose: true }) as VerboseMove[]
     if (moves.length === 0) return ''
-    moves.sort((a,b) => ((b as any).flags?.includes('c') ? 1 : 0) - ((a as any).flags?.includes('c') ? 1 : 0))
+    moves.sort((a, b) => (b.flags?.includes('c') ? 1 : 0) - (a.flags?.includes('c') ? 1 : 0))
     let best = moves[0]
     let bestScore = -Infinity
     for (let d = 1; d <= this.depth; d++) {
@@ -65,12 +65,12 @@ export class SimpleEngine {
     if (depth <= 0 || Date.now() > deadline) {
       return evaluateBoard(game)
     }
-    const moves = game.moves({ verbose: true })
+    const moves = game.moves({ verbose: true }) as VerboseMove[]
     if (moves.length === 0) {
-      if ((game as any).isCheckmate && (game as any).isCheckmate()) return -99999
+      if (game.isCheckmate()) return -99999
       return 0
     }
-    moves.sort((a,b) => ((b as any).flags?.includes('c') ? 1 : 0) - ((a as any).flags?.includes('c') ? 1 : 0))
+    moves.sort((a, b) => (b.flags?.includes('c') ? 1 : 0) - (a.flags?.includes('c') ? 1 : 0))
     let best = -Infinity
     for (const mv of moves) {
       const g = new Chess(game.fen())
@@ -83,4 +83,14 @@ export class SimpleEngine {
     }
     return best
   }
+}
+type VerboseMove = {
+  color: 'w' | 'b'
+  from: string
+  to: string
+  flags: string
+  piece: string
+  san: string
+  lan?: string
+  promotion?: 'q' | 'r' | 'b' | 'n'
 }
