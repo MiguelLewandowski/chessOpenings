@@ -182,9 +182,9 @@ export const importData = (exportedData: ExportedData): boolean => {
 export const deleteAberturaWithCascade = async (aberturaId: string) => {
   try {
     // 1. Carregar dados atuais
-    const licoes = loadFromLocalStorage<Array<{id: string; aberturaId: string; licaoId?: string}>>('licoes', []);
-    const exercicios = loadFromLocalStorage<Array<{id: string; licaoId: string}>>('exercicios', []);
-    const aberturas = loadFromLocalStorage<Array<{id: string}>>('aberturas', []);
+    const licoes = loadFromLocalStorage<Array<{id: string; aberturaId: string; licaoId?: string}>>(STORAGE_KEYS.LICOES, []);
+    const exercicios = loadFromLocalStorage<Array<{id: string; licaoId: string}>>(STORAGE_KEYS.EXERCICIOS, []);
+    const aberturas = loadFromLocalStorage<Array<{id: string}>>(STORAGE_KEYS.ABERTURAS, []);
 
     // 2. Encontrar lições relacionadas à abertura
     const licoesRelacionadas = licoes.filter(licao => licao.aberturaId === aberturaId);
@@ -207,9 +207,9 @@ export const deleteAberturaWithCascade = async (aberturaId: string) => {
     const aberturasRestantes = aberturas.filter(abertura => abertura.id !== aberturaId);
 
     // 7. Salvar todos os dados atualizados
-    saveToLocalStorage('exercicios', exerciciosRestantes);
-    saveToLocalStorage('licoes', licoesRestantes);
-    saveToLocalStorage('aberturas', aberturasRestantes);
+    saveToLocalStorage(STORAGE_KEYS.EXERCICIOS, exerciciosRestantes);
+    saveToLocalStorage(STORAGE_KEYS.LICOES, licoesRestantes);
+    saveToLocalStorage(STORAGE_KEYS.ABERTURAS, aberturasRestantes);
 
     // 8. Retornar estatísticas da exclusão
     return {
