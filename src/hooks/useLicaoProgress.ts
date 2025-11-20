@@ -32,9 +32,10 @@ export const useLicaoProgress = (exercicios: Exercicio[]) => {
     [exercicios]
   );
 
-  // Inicializar progresso dos exercícios apenas quando a lista de exercícios mudar
   useEffect(() => {
-    if (exercicios.length > 0) {
+    if (exercicios.length === 0) return;
+    setProgressState(prev => {
+      if (prev.exerciciosProgress.length === exercicios.length) return prev;
       const initialProgress = exercicios.map(exercicio => ({
         exercicioId: exercicio.id,
         completed: false,
@@ -42,13 +43,9 @@ export const useLicaoProgress = (exercicios: Exercicio[]) => {
         attempts: 0,
         timeSpent: 0
       }));
-
-      setProgressState(prev => ({
-        ...prev,
-        exerciciosProgress: initialProgress
-      }));
-    }
-  }, [exercicios, exercicioIds]);
+      return { ...prev, exerciciosProgress: initialProgress };
+    });
+  }, [exercicioIds]);
 
   const getCurrentExercicio = useCallback(() => {
     return exercicios[progressState.currentExercicioIndex] || null;
