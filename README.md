@@ -219,6 +219,11 @@ npm run dev          # Desenvolvimento
 npm run build        # Build de produção
 npm run start        # Executar build
 npm run lint         # Verificar código
+npm run centauro:test                 # Smoke test do CENTAURO (processTheory)
+npm run centauro:run:theory           # Processa PGNs (teoria) e salva no banco
+npm run centauro:run:theory:dry       # Processa PGNs (teoria) e imprime JSON
+npm run centauro:run:punicao          # Processa PGNs (punição) e salva no banco
+npm run centauro:run:punicao:dry      # Processa PGNs (punição) e imprime JSON
 ```
 
 ### **Padrões de Código**
@@ -227,6 +232,18 @@ npm run lint         # Verificar código
 - **Componentes funcionais** - React moderno
 - **Mobile-first** - Design responsivo
 - **Validação Chess.js** - Movimentos e posições
+
+### **CENTAURO (ETL de PGN)**
+- Pasta de entrada: `data/pgns/` (coloque seus `.pgn` aqui)
+- Executar (teoria): `npm run centauro:run:theory` (usa Prisma e salva no banco)
+- Dry-run (teoria): `npm run centauro:run:theory:dry` (imprime JSON no console)
+- Executar (punição): `npm run centauro:run:punicao`
+- Dry-run (punição): `npm run centauro:run:punicao:dry`
+
+Observações:
+- Controle de concorrência: até 4 tarefas em paralelo (seguro para laptop i7)
+- Engine: mock compatível com futura integração `node-uci`; avaliação em centipawns e `bestmove` heurístico
+- Robustez: PGNs inválidos/erros do engine não interrompem o lote; são apenas logados
 
 ### **Estrutura de Hooks**
 - `useAberturas` - Gestão de aberturas
