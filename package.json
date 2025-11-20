@@ -11,7 +11,12 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:push": "prisma db push",
-    "db:seed": "prisma db seed"
+    "db:seed": "prisma db seed",
+    "centauro:test": "tsx src/scripts/test-engine.ts",
+    "centauro:run:theory": "tsx src/scripts/run-centauro.ts --mode=theory --save",
+    "centauro:run:theory:dry": "tsx src/scripts/run-centauro.ts --mode=theory",
+    "centauro:run:punicao": "tsx src/scripts/run-centauro.ts --mode=punicao --save",
+    "centauro:run:punicao:dry": "tsx src/scripts/run-centauro.ts --mode=punicao"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
