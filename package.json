@@ -16,20 +16,24 @@
     "centauro:run:theory": "tsx src/scripts/run-centauro.ts --mode=theory --save",
     "centauro:run:theory:dry": "tsx src/scripts/run-centauro.ts --mode=theory",
     "centauro:run:punicao": "tsx src/scripts/run-centauro.ts --mode=punicao --save",
-    "centauro:run:punicao:dry": "tsx src/scripts/run-centauro.ts --mode=punicao"
+    "centauro:run:punicao:dry": "tsx src/scripts/run-centauro.ts --mode=punicao",
+    "centauro:crawl:masters": "tsx src/scripts/crawler.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "chess.js": "^1.2.0",
+    "@prisma/client": "^5.19.0",
+    "axios": "^1.13.2",
+    "chess.js": "^1.4.0",
+    "dotenv": "^17.2.3",
     "lucide-react": "^0.511.0",
     "next": "15.3.2",
+    "openai": "^6.9.1",
     "react": "^19.0.0",
     "react-chessboard": "^4.7.3",
     "react-dom": "^19.0.0",
-    "zustand": "^5.0.5",
-    "@prisma/client": "^5.19.0"
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -37,13 +41,13 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^7.0.3",
     "eslint": "^9",
     "eslint-config-next": "15.3.2",
-    "tailwindcss": "^4",
-    "typescript": "^5",
     "prisma": "^5.19.0",
+    "tailwindcss": "^4",
     "tsx": "^4.19.2",
-    "cross-env": "^7.0.3"
+    "typescript": "^5"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
