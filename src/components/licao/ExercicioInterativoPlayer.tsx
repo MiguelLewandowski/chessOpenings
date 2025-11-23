@@ -15,6 +15,7 @@ export default function ExercicioInterativoPlayer({
   exercicio,
   onComplete
 }: ExercicioInterativoPlayerProps) {
+  const dicas = Array.isArray(exercicio.conteudo.dicas) ? exercicio.conteudo.dicas : [];
   const [game, setGame] = useState(new Chess(exercicio.conteudo.posicaoInicial));
   const [isCompleted, setIsCompleted] = useState(false);
   const [attempts, setAttempts] = useState(0);
@@ -192,7 +193,7 @@ export default function ExercicioInterativoPlayer({
                   <span>Resetar</span>
                 </button>
                 
-                {exercicio.conteudo.dicas.length > 0 && (
+                {dicas.length > 0 && (
                   <button
                     onClick={() => setShowHint(!showHint)}
                     className="flex items-center gap-2 px-4 py-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 rounded-lg transition-colors"
@@ -320,14 +321,14 @@ export default function ExercicioInterativoPlayer({
           </div>
 
           {/* Dicas */}
-          {!isCompleted && showHint && exercicio.conteudo.dicas.length > 0 && (
+          {!isCompleted && showHint && dicas.length > 0 && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <h4 className="font-semibold text-yellow-800 mb-2 flex items-center gap-2 text-sm">
                 <Lightbulb size={16} />
                 Dica:
               </h4>
               <p className="text-yellow-700 text-sm">
-                {exercicio.conteudo.dicas[Math.min(attempts, exercicio.conteudo.dicas.length - 1)]}
+                {dicas[Math.min(attempts, dicas.length - 1)]}
               </p>
             </div>
           )}
@@ -355,4 +356,4 @@ export default function ExercicioInterativoPlayer({
       </div>
     </div>
   );
-} 
+}
