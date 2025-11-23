@@ -44,6 +44,7 @@ model Abertura {
   atualizadoEm DateTime    @updatedAt
   licoes       Licao[]
   progressos   AberturaProgress[]
+  modulos      Modulo[]
 }
 
 model Licao {
@@ -51,6 +52,7 @@ model Licao {
   titulo         String
   descricao      String
   aberturaId     String
+  moduloId       String
   ordem          Int
   dificuldade    Dificuldade
   status         Status
@@ -59,6 +61,7 @@ model Licao {
   criadoEm       DateTime    @default(now())
   atualizadoEm   DateTime    @updatedAt
   abertura       Abertura    @relation(fields: [aberturaId], references: [id], onDelete: Cascade)
+  modulo         Modulo      @relation(fields: [moduloId], references: [id], onDelete: Cascade)
   exercicios     Exercicio[]
   progressos     LicaoProgress[]
 }
@@ -79,6 +82,19 @@ model Exercicio {
   criadoEm         DateTime      @default(now())
   atualizadoEm     DateTime      @updatedAt
   licao            Licao         @relation(fields: [licaoId], references: [id], onDelete: Cascade)
+}
+
+model Modulo {
+  id           String    @id @default(cuid())
+  titulo       String
+  descricao    String
+  aberturaId   String
+  ordem        Int
+  status       Status
+  criadoEm     DateTime  @default(now())
+  atualizadoEm DateTime  @updatedAt
+  abertura     Abertura  @relation(fields: [aberturaId], references: [id], onDelete: Cascade)
+  licoes       Licao[]
 }
 
 model OpeningNode {
