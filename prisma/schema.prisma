@@ -81,6 +81,25 @@ model Exercicio {
   licao            Licao         @relation(fields: [licaoId], references: [id], onDelete: Cascade)
 }
 
+model OpeningNode {
+  id            String       @id @default(cuid())
+  fen           String       @unique
+  san           String
+  uci           String
+  popularity    Int
+  whiteWins     Int
+  blackWins     Int
+  draws         Int
+  averageRating Int?
+  parentId      String?
+  parent        OpeningNode? @relation("Tree", fields: [parentId], references: [id], onDelete: Cascade)
+  children      OpeningNode[] @relation("Tree")
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([popularity(sort: Desc)])
+}
+
 model User {
   id       String @id @default("default")
   progressAberturas AberturaProgress[]
